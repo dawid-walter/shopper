@@ -76,4 +76,6 @@ or change at run time.
 Full CQRS was rejected because price and stock change too often for a lagging
 projection, and because a broker with publishers and consumers is not justified by the
 current requirements.
-The slow-changing catalog is the exception, covered by ADR 0010.
+A projection of the slow-changing catalog fed by a polled change feed was considered and
+rejected (ADR 0010): without events it adds a poller, a database and a second read path.
+It becomes worth revisiting once a message broker carries catalog changes (ADR 0015).

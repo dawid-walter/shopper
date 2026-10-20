@@ -62,3 +62,14 @@ flowchart LR
   rather than refactoring.
 * Neutral, because the future adapters exist only in diagrams and the README; no empty
   packages or unused interfaces are created.
+
+## More Information
+
+Domain events are not built yet, because nothing consumes them. The intended path once a
+broker exists: a private domain event inside Pricing (e.g. a component version added) is
+translated at the service boundary into a public integration event, published through
+the broker adapter, and consumed by a listener adapter in the aggregator, which can
+evict a cached price or maintain a projection. The same mechanism would feed a catalog
+projection (rejected for now in ADR 0010). A precomputed read model of current prices is
+not on this path: prices depend on validity periods, and the passing of a period boundary
+produces no event, so such a projection would go stale without a scheduler.

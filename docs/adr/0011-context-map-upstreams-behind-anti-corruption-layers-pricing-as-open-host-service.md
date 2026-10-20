@@ -45,14 +45,14 @@ flowchart LR
   end
   subgraph agg["Product Aggregator · downstream"]
     direction TB
-    A1["ACL<br/>catalog projector"]
+    A1["ACL<br/>catalog adapter"]
     A2["ACL<br/>pricing adapter"]
     A3["ACL<br/>availability adapter"]
     A4["ACL<br/>customer adapter"]
     CORE(["core<br/>product view"])
     A1 & A2 & A3 & A4 --> CORE
   end
-  CAT -- "U → D<br/>change feed" --> A1
+  CAT -- "U → D<br/>REST" --> A1
   PRI -- "U → D<br/>REST" --> A2
   AVA -- "U → D<br/>REST" --> A3
   CUS -- "U → D<br/>REST" --> A4

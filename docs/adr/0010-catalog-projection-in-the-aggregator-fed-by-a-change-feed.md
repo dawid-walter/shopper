@@ -1,5 +1,5 @@
 ---
-status: "proposed"
+status: "rejected"
 date: 2026-10-20
 decision-makers:
 consulted:

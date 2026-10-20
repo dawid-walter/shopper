@@ -55,7 +55,7 @@ flowchart LR
   end
   subgraph out["Outbound adapters"]
     direction TB
-    O1["catalog projection"]
+    O1["catalog REST client"]
     O2["pricing REST client"]
     O3["availability REST client"]
     O4["customer REST client"]

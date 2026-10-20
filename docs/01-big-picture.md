@@ -16,7 +16,7 @@
 | Gradle | [0007](#/adr/0007-gradle-as-the-build-tool.md) |
 | Ports and adapters in the aggregator | [0008](#/adr/0008-ports-and-adapters-in-the-aggregator.md) |
 | Synchronous REST with parallel fan-out on the read path | [0009](#/adr/0009-synchronous-rest-with-parallel-fan-out-on-the-read-path.md) |
-| Catalog projection fed by a change feed (CQRS light, provisional) | [0010](#/adr/0010-catalog-projection-in-the-aggregator-fed-by-a-change-feed.md) |
+| ~~Catalog projection fed by a change feed~~ (rejected: no events yet) | [0010](#/adr/0010-catalog-projection-in-the-aggregator-fed-by-a-change-feed.md) |
 | Context map: ACLs in the aggregator, Pricing as OHS | [0011](#/adr/0011-context-map-upstreams-behind-anti-corruption-layers-pricing-as-open-host-service.md) |
 | Aggregator as an integration context, no DDD aggregates | [0012](#/adr/0012-aggregator-as-an-integration-context-without-ddd-aggregates.md) |
 | `PriceComponent` as the aggregate in Pricing | [0013](#/adr/0013-pricecomponent-as-the-aggregate-in-pricing.md) |
@@ -157,6 +157,8 @@ The customer **always sees the product**, with the price marked as unavailable. 
 - Pricing gets the same latency and failure simulation as the mocks.
 
 ## 7a. Where state lives (Postgres, projections, read models)
+
+> Outcome: no projection for now (ADR 0010 rejected). The analysis below is kept as the record of the options.
 
 | Component | State | Where |
 |---|---|---|

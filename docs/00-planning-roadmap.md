@@ -14,13 +14,12 @@ We plan **from the general to the specific**. A level is closed only once its de
 | Ports and adapters in the aggregator | ✅ ADR 0008 |
 | Ports and adapters in Pricing; gRPC and broker as future adapters ([04](#/04-module-architecture.md)) | ✅ ADR 0015 |
 
-## Level 2 · Communication ✅ closed (projection to be revisited in level 4)
+## Level 2 · Communication ✅ closed
 
 | Topic | State |
 |---|---|
 | Read path: synchronous REST, parallel fan-out | ✅ ADR 0009 |
-| Catalog projection in Postgres (CQRS light) | ✅ ADR 0010, provisional |
-| Asynchronous channel: change feed polled over HTTP, no broker | ✅ ADR 0010 |
+| Catalog projection (CQRS light) | ❌ ADR 0010 rejected: no events yet; revisit with a broker |
 | Upstream latency and failures simulated by Toxiproxy | ✅ ADR 0014 |
 
 ## Level 3 · Domain modelling
