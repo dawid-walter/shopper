@@ -84,7 +84,7 @@ One controller: `GET /prices/{id}?market&customerId&at` (`at` previews a future 
 
 **Commits:** `test(aggregator): specify product view composition A1, A3–A10` (tests, red) → `feat(aggregator): implement the product view service with one shared fetch path` (green)
 
-Domain records and the three section types (each with a status), ports in and out, and `ProductViewService`: Scatter-Gather over the four ports (ADR 0009) through one shared fetch path (ADR 0017): run in parallel, retry a fast error once if the remaining budget covers the upstream's p99 (ADR 0016), cut everything at the budget. Catalog is required (404 / 503), the rest degrade. Optional ports return `Optional`: a 404 there is "no data", not a failure.
+Domain records, ports in and out, and `ProductViewService`: Scatter-Gather over the four ports (ADR 0009) through one shared fetch path (ADR 0017): run in parallel, retry a fast error once if the remaining budget covers the upstream's p99 (ADR 0016), cut everything at the budget. Catalog is required (404 / 503); the other parts of `ProductView` are `Optional` and empty when their upstream fails. The status words clients see (`AVAILABLE`, `UNKNOWN`, `STANDARD`…) are chosen in the REST response, not in the domain. Optional ports return `Optional`: a 404 there is "no data", not a failure.
 
 **Spec covered:** A1, A3–A10, plus "fast error is retried once" and "timeout is not retried", in `ProductViewServiceTest`, with lambdas as fake ports.
 
@@ -94,13 +94,13 @@ Domain records and the three section types (each with a status), ports in and ou
 
 **Implementation (commit 2):**
 
-`GetProductView.java`, `AvailabilityPort.java`, `CatalogPort.java`, `CustomerPort.java`, `PricingPort.java`, `UpstreamException.java`, `ProductViewService.java`, `ProductViewSettings.java`, `CatalogUnavailableException.java`, `CustomerProfile.java`, `CustomerSection.java`, `Market.java`, `Price.java`, `PriceSection.java`, `ProductDetails.java`, `ProductNotFoundException.java`, `ProductView.java`, `Stock.java`, `StockSection.java`, `UnsupportedMarketException.java`
+`GetProductView.java`, `AvailabilityPort.java`, `CatalogPort.java`, `CustomerPort.java`, `PricingPort.java`, `UpstreamException.java`, `ProductViewService.java`, `ProductViewSettings.java`, `CatalogUnavailableException.java`, `CustomerProfile.java`, `Market.java`, `Price.java`, `ProductDetails.java`, `ProductNotFoundException.java`, `ProductView.java`, `Stock.java`
 
 ## Stage 5 · Aggregator adapters and REST API
 
 **Commits:** `test(aggregator): specify the aggregator over HTTP A1, A2, A5–A7, A10–A13` (tests, red) → `feat(aggregator): add REST adapters with timeouts and circuit breakers, and the product endpoint` (green)
 
-`UpstreamClient`: one per upstream, with its own timeout (p99.9) and circuit breaker; every failure leaves as `UpstreamException` (ERROR, TIMEOUT, CIRCUIT_OPEN), so HTTP and Resilience4j never reach the core. Four small adapters translate upstream JSON into domain records, reading only the fields they need. `ProductController` + `ErrorHandler` + `ProductResponse` (every section has `status`). `AggregatorConfig` is the only place that knows both sides; values from ADR 0016 in `application.yml`.
+`UpstreamClient`: one per upstream, with its own timeout (p99.9) and circuit breaker; every failure leaves as `UpstreamException` (ERROR, TIMEOUT, CIRCUIT_OPEN), so HTTP and Resilience4j never reach the core. Four small adapters translate upstream JSON into domain records, reading only the fields they need. `ProductController` + `ErrorHandler` + `ProductResponse`, which turns each empty part of the view into a section status (`UNAVAILABLE`, `UNKNOWN`, `STANDARD`). `AggregatorConfig` is the only place that knows both sides; values from ADR 0016 in `application.yml`.
 
 **Spec covered:** A1, A2, A5–A7, A10–A13 in `ProductEndpointComponentTest`: the whole app, upstreams stubbed by one WireMock server, circuit window 4 so A13 needs four requests.
 

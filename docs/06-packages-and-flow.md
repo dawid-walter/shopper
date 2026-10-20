@@ -13,10 +13,7 @@ product-aggregator/src/main/java/com/shopper/aggregator/
 │   ├── Price                     currency, base, discount, final
 │   ├── Stock                     quantity, warehouse, expected delivery
 │   ├── CustomerProfile           segment, preferences
-│   ├── ProductView               product + price, stock and customer sections
-│   ├── PriceSection              AVAILABLE (with Price) | UNAVAILABLE
-│   ├── StockSection              KNOWN (with Stock) | UNKNOWN
-│   ├── CustomerSection           PERSONALIZED (with profile) | STANDARD
+│   ├── ProductView               product + Optional price, stock and customer
 │   ├── ProductNotFoundException  → 404
 │   └── CatalogUnavailableException → 503
 ├── application/
@@ -50,7 +47,7 @@ Where each concern lives:
 | HTTP in / JSON / status codes | `presentation/rest` |
 | Timeout and circuit breaker per upstream | `infrastructure/adapter/*` + `infrastructure/config` |
 | Parallel calls, time budget, required vs optional | `application/service/ProductViewService` |
-| What a section looks like when data is missing | `domain` (the section types) |
+| How a missing part is shown to clients (`UNAVAILABLE`, `UNKNOWN`, `STANDARD`) | `presentation/rest/ProductResponse` |
 
 ## Pricing
 
