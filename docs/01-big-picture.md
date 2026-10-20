@@ -10,6 +10,7 @@
 | REST only, no gRPC | [0001](#/adr/0001-rest-only-no-grpc.md) |
 | Each upstream is a separate service in Docker | [0002](#/adr/0002-upstreams-as-separate-services-in-docker.md) |
 | Pricing is a real archetype, the rest are mocks ([design](#/02-pricing.md)) | [0003](#/adr/0003-pricing-as-a-real-archetype-implementation-other-upstreams-as-mocks.md) |
+| Pricing keeps its state in memory | [0004](#/adr/0004-in-memory-storage-for-pricing.md) |
 
 ## 2. System map
 
@@ -150,18 +151,30 @@ The customer **always sees the product**, with the price marked as unavailable. 
 
 | Component | State | Where |
 |---|---|---|
-| Aggregator | none, composes the response live | possibly a short in-memory cache |
-| Pricing | components, versions, price lists, contracts | **Postgres** (proposal) |
-| Mocks | test data | in memory / seeded from JSON |
+| Aggregator | projections in **Postgres** (proposal, variant to choose below) | Postgres |
+| Pricing | components, versions, price lists, contracts | in memory ([ADR 0004](#/adr/0004-in-memory-storage-for-pricing.md)) |
+| Mocks | test data | in memory |
 
-Projections and read models would only appear in the asynchronous variant (CQRS, §3). The aggregator would then keep a ready-made product view in Postgres, updated by events. We do not implement that variant; we describe it in the README.
+**Postgres in the aggregator: what kind of projection?** The term covers two very different designs:
+
+| | (a) Event-driven read model (full CQRS) | (b) Last-known-good snapshot | (c) No Postgres |
+|---|---|---|---|
+| How it gets filled | upstreams publish events to a broker; the aggregator consumes them | the aggregator saves every successful upstream response | — (in-memory cache only) |
+| Read path | reads only its own Postgres, no upstream calls | calls upstreams live; reads the snapshot **only when an upstream fails** | calls upstreams live |
+| Upstream failure | invisible to the client | the client gets the last known data, marked `stale` with an "as of" time | section `UNAVAILABLE` |
+| Freshness | event lag (seconds) | live; stale only during a failure | live |
+| Extra pieces | broker (Kafka/Rabbit), publishers in every upstream, consumers, idempotency, replay | Postgres, Flyway, one table per source | none |
+| Cost within 3–4 h | **too large**: it alone fills the budget | medium (~45 min) | none |
+| Fit with flash sales (B) | risky: a lagging price is a wrong price | per source: stale stock is acceptable, a stale price is not | fine |
+
+Recommendation: **(b)** if we want Postgres in the aggregator, with a **per-source staleness policy** (stock may be served stale with a timestamp, price never). (a) goes into the README as the "with more time" direction.
 
 ## 8. Open questions
 
-1. **Postgres for Pricing only** (§7a): yes?
+1. **Postgres in the aggregator:** variant (a), (b) or (c) from §7a?
 2. **Customer segment for discounts:** from the contract in Pricing, or passed in by the aggregator? (details in [02](#/02-pricing.md))
-3. **Versions:** Java 21 + Spring Boot 3.5 or Java 25 + Spring Boot 4? Resilience4j support needs checking.
-4. **Design question:** I recommend **B (flash sales)**, because it showcases the Pricing archetype directly.
+3. **Versions:** "the newest". Spring Boot **4.1.1** (latest GA; 4.2 is still a milestone), Resilience4j **2.4.0** (has a Spring Boot 4 module). Java: **25** (latest LTS) or **27** (latest release, non-LTS)?
+4. **Design question:** I recommend **B (flash sales)**.
 5. **Repository layout:** a monorepo with Gradle/Maven modules and a single `docker compose up`?
 6. **Language and market:** a language fallback (e.g. missing `pl` translation → `en`)? Currency derived from the market (`pl-PL` → PLN)?
 7. The message cut off at "główna fun…". What was meant to follow?

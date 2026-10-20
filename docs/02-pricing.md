@@ -72,12 +72,7 @@ To decide: do we also keep the segment (`DEALER`/`WORKSHOP`) in Pricing, as part
 
 ## Persistence
 
-Pricing is the only service with real state: components, their versions with `validity`, price lists and contracts. That makes it the natural home for **Postgres**:
-- component and version definitions as tables, calculator parameters as `jsonb`;
-- seed data through Flyway;
-- versions are immutable (append-only), which makes auditing easy.
-
-Alternative: in memory, seeded from a file. Faster, but "history follows from the model" only lasts until the next restart.
+Decided: **in-memory maps, seeded at startup** ([ADR 0004](#/adr/0004-in-memory-storage-for-pricing.md)). Pricing is a simulated upstream, so a database would add setup without adding anything the assignment evaluates. Versions added at runtime (a live flash sale) are lost on restart, which is acceptable here.
 
 ## Scope for 3–4 h: build it evolutionarily
 
