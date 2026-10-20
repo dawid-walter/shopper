@@ -1,0 +1,12 @@
+# The Kramp assignment document: not published in the repository
+kramp-backend-assignment.pdf
+hub/pages/kramp-backend-assignment.pdf
+
+# Build / IDE
+target/
+build/
+.gradle/
+.idea/
+*.iml
+.vscode/
+.DS_Store
