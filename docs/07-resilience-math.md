@@ -68,6 +68,26 @@ The response itself (`200`) depends only on Catalog: ≈ **99.9%**.
 - Normal failure rate of the worst upstream ≈ 2.1% (Availability: 2% errors + 0.1% timeouts); take 3% to be conservative. Probability that 10 of 20 fail by chance: **≈ 8 × 10⁻¹¹**, so a false trip practically never happens.
 - A real outage (≥ 50% failing) opens it within ~20 calls, and from then on the section degrades **immediately** instead of after a timeout.
 
+## 6. Options: latency against completeness
+
+Monte Carlo over the same model (200 000 simulated requests, all four sections requested). "Complete" = every section has data; the `200` itself depends only on Catalog (~99.9%) in every option.
+
+| Option | Complete response | Median | p99 | Worst case |
+|---|---|---|---|---|
+| 0 · No timeouts, no retries | 96.4% | 125 ms | 335 ms | ~1 s, unbounded |
+| 1 · **Fast**: everything capped at 200 ms, retry | 85.5% | 125 ms | 200 ms | **200 ms** |
+| 2 · **Balanced**: timeouts at p99, retry | 96.0% | 126 ms | 320 ms | 325 ms |
+| 3 · **Complete** (ADR 0016): timeouts at p99.9, retry, 500 ms budget | **99.6%** | 126 ms | 335 ms | 474 ms |
+| 4 · Complete + hedged requests at p95 | 99.9% | 128 ms | 347 ms | 500 ms |
+
+What it shows:
+- **The median does not move** (~125 ms): the options only decide what happens in the tail.
+- **Speed is bought with optional sections.** Option 1 guarantees 200 ms, but one response in seven arrives without price, stock or personalisation.
+- **Option 3 bounds the wait and completes 99.6%** of responses; that is the chosen default.
+- **Hedging** (a second request when the first is slower than p95) adds ~5% load and lifts completeness to 99.9%, but does not shorten the tail with this latency model. Worth it only if measurements show a heavier tail.
+
+The guarantee is therefore **bounded latency plus a defined degraded response**, not 100% complete data.
+
 ## What changes if the assumptions are wrong
 
 The formulas stay; the inputs change. With real latency histograms (Micrometer, Grafana) the timeouts are recomputed from measured p99.9 instead of the assumed σ.
