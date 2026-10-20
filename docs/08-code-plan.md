@@ -4,7 +4,7 @@
 
 > Status: **for review**. Every class and test that will be written, split into stages. Each stage is two commits: the tests first (red), then the implementation (green). Stages 0 and 6 are one commit each.
 >
-> The code below was **built and run before being published here**: Gradle build green, 38 tests passing, and the system checked end to end in Docker. What you read is what goes into the repository.
+> The code below was **built and run before being published here**: Gradle build green, 37 tests passing, and the system checked end to end in Docker. What you read is what goes into the repository.
 
 ## Stages
 
@@ -12,7 +12,7 @@
 |---|---|---|---|
 | 0 | Gradle skeleton, five bootable modules | context loads ×5 | — |
 | 1 | Catalog, Availability, Customer mocks | 7 | 0 |
-| 2 | Pricing model, service, in-memory storage | 4 (P1–P4, P7) | 0 |
+| 2 | Pricing model, service, in-memory storage | 3 (P1–P4) | 0 |
 | 3 | Pricing REST API | 2 (P5, P6) | 2 |
 | 4 | Aggregator domain, ports, service | 9 | 0 |
 | 5 | Aggregator adapters, config, REST API | 11 | 4 (contracts from 1, 3) |
@@ -50,11 +50,11 @@ Three plain services with fixed sample data shared by all services (spec page 05
 
 ## Stage 2 · Pricing core (valuation archetype)
 
-**Commits:** `test(pricing): specify pricing behaviour P1–P4, P7` (tests, red) → `feat(pricing): implement the pricing model, service and in-memory storage` (green)
+**Commits:** `test(pricing): specify pricing behaviour P1–P4` (tests, red) → `feat(pricing): implement the pricing model, service and in-memory storage` (green)
 
-Pricing is a **demo of the valuation archetype**, kept small: `Calculator` (sealed: Fixed, Percentage) is pure maths; `PriceComponent` gives it a role (LIST_PRICE, DISCOUNT, TAX) and holds immutable versions with `Validity` and `Applicability`; `Tariff` is the composite, the ordered component ids of a market, so discounts come before VAT. `PriceQuote` sums the breakdown lines and refuses a price without a list price or a tax. Writes go through `ComponentRepository.update`, an atomic version check (optimistic locking, ADR 0013). Tariffs are plain sample data; components live in memory (ADR 0004). One inbound port, `PricingUseCase`.
+Pricing is a **demo of the valuation archetype**, kept small: `Calculator` (sealed: Fixed, Percentage) is pure maths; `PriceComponent` gives it a role (LIST_PRICE, DISCOUNT, TAX) and holds immutable versions with `Validity` and `Applicability`; `Tariff` is the composite, the ordered component ids of a market, so discounts come before VAT. `PriceQuote` sums the breakdown lines and refuses a price without a list price or a tax. A write appends a version atomically through `ComponentRepository.update` (ADR 0013); no optimistic locking, since nothing is edited from a stale read. Tariffs are plain sample data; components live in memory (ADR 0004). One inbound port, `PricingUseCase`.
 
-**Spec covered:** P1–P4 and P7 in `PricingServiceTest` (four tests, fixed clock).
+**Spec covered:** P1–P4 in `PricingServiceTest` (three tests, fixed clock).
 
 **Tests (commit 1):**
 
@@ -62,13 +62,13 @@ Pricing is a **demo of the valuation archetype**, kept small: `Calculator` (seal
 
 **Implementation (commit 2):**
 
-`PricingUseCase.java`, `PricingService.java`, `Market.java`, `Money.java`, `NotPricedException.java`, `PriceQuote.java`, `PricingContext.java`, `Calculator.java`, `FixedCalculator.java`, `PercentageCalculator.java`, `Applicability.java`, `ComponentRole.java`, `ComponentVersion.java`, `PriceComponent.java`, `Tariff.java`, `Validity.java`, `ComponentRepository.java`, `StaleComponentException.java`, `PricingConfig.java`, `InMemoryComponentRepository.java`, `SeedData.java`
+`PricingUseCase.java`, `PricingService.java`, `Market.java`, `Money.java`, `NotPricedException.java`, `PriceQuote.java`, `PricingContext.java`, `Calculator.java`, `FixedCalculator.java`, `PercentageCalculator.java`, `Applicability.java`, `ComponentRole.java`, `ComponentVersion.java`, `PriceComponent.java`, `Tariff.java`, `Validity.java`, `ComponentRepository.java`, `PricingConfig.java`, `InMemoryComponentRepository.java`, `SeedData.java`
 
 ## Stage 3 · Pricing REST API
 
 **Commits:** `test(pricing): specify the pricing HTTP API` (tests, red) → `feat(pricing): expose prices and component versions over REST` (green)
 
-One controller: `GET /prices/{id}?market&customerId&at` (`at` previews a future price) and `POST /components/{id}/versions` with `expectedVersion` and a percentage rate, enough for a flash sale or a new VAT rate. Errors map to 404 / 409 / 400.
+One controller: `GET /prices/{id}?market&customerId&at` (`at` previews a future price) and `POST /components/{id}/versions` with a percentage rate, enough for a flash sale or a new VAT rate. Errors map to 404 / 400.
 
 **Spec covered:** P5 and P6 over HTTP in `PricingApiTest` (two tests).
 
@@ -134,14 +134,14 @@ Decided while writing the code; to confirm in review:
 4. **One rounding point:** each breakdown line is rounded to cents in `Money`; the totals are sums of rounded lines, like an invoice.
 5. **Optional ports return `Optional`**: a 404 from Pricing, Availability or Customer means "no data", and the circuit breaker counts it as a success. Only Catalog turns 404 into `ProductNotFoundException`.
 6. **Retry is Spring's `@Retryable` on the adapters**, next to the timeout and circuit breaker, so all resilience lives in infrastructure and the service only composes. The retry does not check the remaining budget; the budget still bounds the response (ADR 0016).
-7. **Extra classes** not on page 06: `UpstreamException`, `FastUpstreamFailure`, `UpstreamClient`, `AggregatorProperties`, `Applicability`, `StaleComponentException`.
-8. **Pricing is kept to a demo** of the archetype: one inbound port, tariffs as sample data, the API adds percentage versions only, four plus two example tests.
+7. **Extra classes** not on page 06: `UpstreamException`, `FastUpstreamFailure`, `UpstreamClient`, `AggregatorProperties`, `Applicability`.
+8. **Pricing is kept to a demo** of the archetype: one inbound port, tariffs as sample data, the API appends percentage versions only, three plus two example tests, no optimistic locking.
 9. **Spec additions:** two component tests for the retry rule (fast error retried once, timeout never).
 10. **Not in this plan:** Swagger UI, Toxiproxy, Grafana, the chaos skill and the README. They come after, as planned.
 
 ## Verification done
 
-- `./gradlew test`: 38 tests, all green (timing tests A10, A11 included).
+- `./gradlew test`: 37 tests, all green (timing tests A10, A11 included).
 - `docker compose up --build`, then:
 
 | Request | Result |

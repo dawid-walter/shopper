@@ -37,7 +37,7 @@ Markets: `pl-PL` (PLN, VAT 23%), `de-DE` (EUR, VAT 19%), `nl-NL` (EUR, VAT 21%).
 ## Pricing
 
 - `GET /prices/{productId}?market=…&customerId=…&at=…`: `at` (optional, default now) prices at a given moment, e.g. a future VAT change.
-- `POST /components/{componentId}/versions`: adds a percentage version (rate, validity, markets/products/customers) with `expectedVersion` for optimistic locking.
+- `POST /components/{componentId}/versions`: appends a percentage version (rate, validity, markets/products/customers).
 
 Single example tests on the domain (pure, no Spring), plus one over HTTP.
 
@@ -49,7 +49,6 @@ Single example tests on the domain (pure, no Spring), plus one over HTTP.
 | P4 | flash-sale version −20% valid 10:00–12:00 | price at 11:00 / at 12:00 | applied at 11:00; not applied at 12:00 (time from an injected clock) |
 | P5 | `P-9999`, or a market without a price list | price | "not priced" → `404` |
 | P6 | VAT PL 23%; a new version **24% valid from 2027-01-01** is added via `POST /components/vat-pl/versions` | price for `pl-PL` with `at=2026-12-31` / `at=2027-01-02` | 23% before, 24% after; the old version is untouched |
-| P7 | two writers add a version to `vat-pl`, both expecting version 3 | second write | `409 Conflict`; the retry on the new version succeeds |
 
 ## Not tested in automated tests
 

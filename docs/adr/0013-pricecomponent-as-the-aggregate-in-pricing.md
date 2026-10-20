@@ -33,14 +33,16 @@ boundary lies.
 Chosen option: "`PriceComponent` as the aggregate", because adding a version is the one
 write in Pricing with invariants to protect:
 
-* at any point in time exactly one version applies; when validity periods overlap, the
-  version with the later start wins;
-* a version identical to the current one is rejected;
+* at any point in time at most one version applies; when several match, the one that
+  started last wins;
+* a version identical to an existing one is rejected;
 * a validity period is half-open and its start precedes its end.
 
-Concurrent changes to the same component are resolved with optimistic locking: the
-second write is rejected and has to be retried. The read path, calculators, `Money`,
-`Validity` and the price breakdown are not aggregates.
+A write appends a version; it never edits one. The append is applied atomically to the
+component's current state, so concurrent appends cannot overwrite each other. The read
+path, calculators, `Money`, `Validity` and the price breakdown are not aggregates. The
+composite is a `Tariff`: the ordered ids of the components that make up a market's
+price, unversioned.
 
 ```mermaid
 classDiagram
@@ -49,20 +51,14 @@ classDiagram
     <<aggregate root>>
     id
     name
-    version (optimistic lock)
+    role
   }
   class ComponentVersion {
     <<immutable>>
-    validity
-    definedAt
-  }
-  class SimpleVersion {
     calculator
+    validity
     applicability
-  }
-  class CompositeVersion {
-    child component ids
-    dependencies between children
+    definedAt
   }
   class Validity {
     <<value object>>
@@ -71,27 +67,28 @@ classDiagram
   }
   class Calculator {
     <<pure function>>
-    Fixed · Percentage · StepFunction
+    Fixed · Percentage
+  }
+  class Tariff {
+    market
+    ordered component ids
   }
   PriceComponent "1" *-- "1..*" ComponentVersion : versions
-  ComponentVersion <|-- SimpleVersion
-  ComponentVersion <|-- CompositeVersion
   ComponentVersion --> Validity
-  SimpleVersion --> Calculator
-  CompositeVersion ..> PriceComponent : refers by id
+  ComponentVersion --> Calculator
+  Tariff ..> PriceComponent : refers by id
 ```
 
 ```mermaid
 sequenceDiagram
   actor A as Pricing manager A
   actor B as Pricing manager B
-  participant P as promo-pl (v7)
-  A->>P: add flash-sale version (expects v7)
-  B->>P: add another version (expects v7)
-  P-->>A: accepted → v8
-  P-->>B: rejected: component changed (now v8)
-  B->>P: retry on v8 (invariants checked again)
-  P-->>B: accepted → v9
+  participant P as vat-pl
+  A->>P: add version 24% from 2027-01-01
+  B->>P: add version 0% for exports
+  Note over P: each append is applied atomically to the current state
+  P-->>A: appended
+  P-->>B: appended (A's version is kept)
 ```
 
 ### Consequences
@@ -102,3 +99,12 @@ sequenceDiagram
   component applies in every price that uses it, without rewiring.
 * Neutral, because a customer discount contract is a second aggregate candidate (one
   applicable contract per customer per period); it is in scope only if time allows.
+
+## More Information
+
+Optimistic locking is deliberately absent. It protects a read-modify-write: a client
+reads a component, edits it and saves the whole of it, possibly over someone else's
+change. Appending a version is not that, and the atomic append already prevents lost
+updates. If clients start editing components based on what they read, add a version
+number to the component, return it as an `ETag`, require `If-Match` on the write and
+answer `409` or `412` on a mismatch (with JPA: `@Version`).
