@@ -48,4 +48,4 @@ Single example tests on the domain (pure, no Spring), plus one over HTTP.
 
 ## Not tested in automated tests
 
-Toxiproxy scenarios (real network faults) are run by hand for the demo; WireMock gives the component tests the same failures deterministically.
+Toxiproxy scenarios (real network faults) belong to the later demo with Grafana. WireMock gives the component tests the same kinds of failures deterministically; the tests do not depend on Toxiproxy.
