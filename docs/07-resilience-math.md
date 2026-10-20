@@ -35,7 +35,7 @@ Calls run in parallel, so the worst case is the slowest upstream's timeout: **bu
 
 Why per-section degradation matters, in numbers: the chance that **at least one** of the four calls lands beyond its p99 is 1 − 0.99⁴ ≈ **3.9%** of requests. Without independent timeouts, one in ~25 requests would wait for the slowest tail.
 
-## 3. Retry: once, fast errors only, only if it fits the budget
+## 3. Retry: once, fast errors only
 
 With independent failures, one retry turns failure probability `p` into `p²`:
 
@@ -51,7 +51,7 @@ With independent failures, one retry turns failure probability `p` into `p²`:
 Rules that follow:
 - **Retry fast errors, never timeouts.** A timed-out call has already used its time; retrying it would double the worst case past the budget.
 - **One retry is enough.** A second one would move Availability from 99.86% to ~99.9% (the timeout loss dominates), for more load on a struggling service.
-- **Only if the remaining budget ≥ the upstream's p99**, otherwise the retry cannot finish in time and only adds load.
+- **No delay, and no budget check.** Implemented with Spring's `@Retryable(maxRetries = 1, delay = 0)` on the adapters. A retry that cannot finish in time is cut by the request budget like any call: it wastes one upstream request but never delays the response. A retry predicate could skip it when less than the upstream's p99 remains.
 
 ## 4. The whole response
 

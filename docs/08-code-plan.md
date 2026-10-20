@@ -14,8 +14,8 @@
 | 1 | Catalog, Availability, Customer mocks | 7 | 0 |
 | 2 | Pricing model, service, in-memory storage | 4 (P1–P4, P7) | 0 |
 | 3 | Pricing REST API | 2 (P5, P6) | 2 |
-| 4 | Aggregator domain, ports, service | 11 | 0 |
-| 5 | Aggregator adapters, config, REST API | 9 | 4 (contracts from 1, 3) |
+| 4 | Aggregator domain, ports, service | 9 | 0 |
+| 5 | Aggregator adapters, config, REST API | 11 | 4 (contracts from 1, 3) |
 | 6 | Dockerfile, docker compose | by hand | 1, 3, 5 |
 
 Stages 1, 2 and 4 are independent of each other and can run in parallel.
@@ -84,9 +84,9 @@ One controller: `GET /prices/{id}?market&customerId&at` (`at` previews a future 
 
 **Commits:** `test(aggregator): specify product view composition A1, A3–A10` (tests, red) → `feat(aggregator): implement the product view service with one shared fetch path` (green)
 
-Domain records, ports in and out, and `ProductViewService`: Scatter-Gather over the four ports (ADR 0009) through one shared fetch path (ADR 0017): run in parallel, retry a fast error once if the remaining budget covers the upstream's p99 (ADR 0016), cut everything at the budget. Catalog is required (404 / 503); the other parts of `ProductView` are `Optional` and empty when their upstream fails. The status words clients see (`AVAILABLE`, `UNKNOWN`, `STANDARD`…) are chosen in the REST response, not in the domain. Optional ports return `Optional`: a 404 there is "no data", not a failure.
+Domain records, ports in and out, and `ProductViewService`: Scatter-Gather over the four ports (ADR 0009) through one shared path (ADR 0017): every call runs in parallel (`inParallel`) and every wait is cut at the 500 ms budget (ADR 0016). Catalog is required (404 / 503); the other parts of `ProductView` are `Optional` and empty when their upstream fails. The status words clients see (`AVAILABLE`, `UNKNOWN`, `STANDARD`…) are chosen in the REST response, not in the domain. Optional ports return `Optional`: a 404 there is "no data", not a failure.
 
-**Spec covered:** A1, A3–A10, plus "fast error is retried once" and "timeout is not retried", in `ProductViewServiceTest`, with lambdas as fake ports.
+**Spec covered:** A1, A3–A10 in `ProductViewServiceTest`, with lambdas as fake ports.
 
 **Tests (commit 1):**
 
@@ -94,15 +94,15 @@ Domain records, ports in and out, and `ProductViewService`: Scatter-Gather over 
 
 **Implementation (commit 2):**
 
-`GetProductView.java`, `AvailabilityPort.java`, `CatalogPort.java`, `CustomerPort.java`, `PricingPort.java`, `UpstreamException.java`, `ProductViewService.java`, `ProductViewSettings.java`, `CatalogUnavailableException.java`, `CustomerProfile.java`, `Market.java`, `Price.java`, `ProductDetails.java`, `ProductNotFoundException.java`, `ProductView.java`, `Stock.java`
+`GetProductView.java`, `AvailabilityPort.java`, `CatalogPort.java`, `CustomerPort.java`, `FastUpstreamFailure.java`, `PricingPort.java`, `UpstreamException.java`, `ProductViewService.java`, `CatalogUnavailableException.java`, `CustomerProfile.java`, `Market.java`, `Price.java`, `ProductDetails.java`, `ProductNotFoundException.java`, `ProductView.java`, `Stock.java`
 
 ## Stage 5 · Aggregator adapters and REST API
 
 **Commits:** `test(aggregator): specify the aggregator over HTTP A1, A2, A5–A7, A10–A13` (tests, red) → `feat(aggregator): add REST adapters with timeouts and circuit breakers, and the product endpoint` (green)
 
-`UpstreamClient`: one per upstream, with its own timeout (p99.9) and circuit breaker; every failure leaves as `UpstreamException` (ERROR, TIMEOUT, CIRCUIT_OPEN), so HTTP and Resilience4j never reach the core. Four small adapters translate upstream JSON into domain records, reading only the fields they need. `ProductController` + `ErrorHandler` + `ProductResponse`, which turns each empty part of the view into a section status (`UNAVAILABLE`, `UNKNOWN`, `STANDARD`). `AggregatorConfig` is the only place that knows both sides; values from ADR 0016 in `application.yml`.
+`UpstreamClient`: one per upstream, with its own timeout (p99.9) and circuit breaker; every failure leaves as `UpstreamException` (TIMEOUT, CIRCUIT_OPEN) or its subclass `FastUpstreamFailure` (5xx, refused connection), so HTTP and Resilience4j never reach the core. Each adapter method has Spring's `@Retryable(includes = FastUpstreamFailure.class, maxRetries = 1, delay = 0)`: fast errors are retried once, timeouts never. Four small adapters translate upstream JSON into domain records, reading only the fields they need. `ProductController` + `ErrorHandler` + `ProductResponse`, which turns each empty part of the view into a section status (`UNAVAILABLE`, `UNKNOWN`, `STANDARD`). `AggregatorConfig` is the only place that knows both sides; values from ADR 0016 in `application.yml`.
 
-**Spec covered:** A1, A2, A5–A7, A10–A13 in `ProductEndpointComponentTest`: the whole app, upstreams stubbed by one WireMock server, circuit window 4 so A13 needs four requests.
+**Spec covered:** A1, A2, A5–A7, A10–A13 in `ProductEndpointComponentTest`: the whole app, upstreams stubbed by one WireMock server, circuit window 4 so A13 needs four requests. Plus the retry rule: a fast error is retried once, a timeout never.
 
 **Tests (commit 1):**
 
@@ -110,7 +110,7 @@ Domain records, ports in and out, and `ProductViewService`: Scatter-Gather over 
 
 **Implementation (commit 2):**
 
-`build.gradle.kts`, `application.yml`, `UpstreamClient.java`, `AvailabilityRestClient.java`, `CatalogRestClient.java`, `CustomerRestClient.java`, `PricingRestClient.java`, `AggregatorConfig.java`, `AggregatorProperties.java`, `ErrorHandler.java`, `ProductController.java`, `ProductResponse.java`
+`build.gradle.kts`, `UpstreamClient.java`, `AvailabilityRestClient.java`, `CatalogRestClient.java`, `CustomerRestClient.java`, `PricingRestClient.java`, `AggregatorConfig.java`, `AggregatorProperties.java`, `ErrorHandler.java`, `ProductController.java`, `ProductResponse.java`, `application.yml`
 
 ## Stage 6 · Docker
 
@@ -133,10 +133,10 @@ Decided while writing the code; to confirm in review:
 3. **A price needs a list price and a tax**; otherwise `NotPricedException` → 404 (archetype audit finding 1: an unconfigured market never gets a silently wrong price).
 4. **One rounding point:** each breakdown line is rounded to cents in `Money`; the totals are sums of rounded lines, like an invoice.
 5. **Optional ports return `Optional`**: a 404 from Pricing, Availability or Customer means "no data", and the circuit breaker counts it as a success. Only Catalog turns 404 into `ProductNotFoundException`.
-6. **Retry lives in the application's fetch path**, because only it knows the remaining budget; timeouts and circuit breakers live in `UpstreamClient` (infrastructure).
-7. **Extra classes** not on page 06: `ProductViewSettings`, `UpstreamException`, `UpstreamClient`, `AggregatorProperties`, `Applicability`, `StaleComponentException`.
+6. **Retry is Spring's `@Retryable` on the adapters**, next to the timeout and circuit breaker, so all resilience lives in infrastructure and the service only composes. The retry does not check the remaining budget; the budget still bounds the response (ADR 0016).
+7. **Extra classes** not on page 06: `UpstreamException`, `FastUpstreamFailure`, `UpstreamClient`, `AggregatorProperties`, `Applicability`, `StaleComponentException`.
 8. **Pricing is kept to a demo** of the archetype: one inbound port, tariffs as sample data, the API adds percentage versions only, four plus two example tests.
-9. **Spec additions:** two unit tests for the retry rule (fast error retried once, timeout never).
+9. **Spec additions:** two component tests for the retry rule (fast error retried once, timeout never).
 10. **Not in this plan:** Swagger UI, Toxiproxy, Grafana, the chaos skill and the README. They come after, as planned.
 
 ## Verification done

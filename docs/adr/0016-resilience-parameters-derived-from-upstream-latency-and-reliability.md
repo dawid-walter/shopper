@@ -36,7 +36,7 @@ reliability counts fast errors; failures are independent between attempts.
 |---|---|---|
 | Timeout per upstream | Catalog 235 ms, Customer 280 ms, Pricing 375 ms, Availability 470 ms | p99.9 of each latency distribution, the time within which 99.9% of normal responses arrive: cuts 0.1% of good answers, against 1% at p99 (1 in 100 slower) |
 | Request budget | 500 ms | calls run in parallel, so the slowest timeout bounds the request |
-| Retry | once, fast errors only, only if the remaining budget covers the upstream's p99 | one retry turns failure `p` into `p²` (Availability 97.9% → 99.86%); a timeout has used its time and is not retried |
+| Retry | once, fast errors only (5xx, refused connection), no delay; Spring's `@Retryable` on each adapter | one retry turns failure `p` into `p²` (Availability 97.9% → 99.86%); a timeout has used its time and is not retried; the request budget still bounds the latency |
 | Circuit breaker | open at ≥ 50% failures over the last 20 calls, 10 s open, then half-open | a false trip at a 3% failure rate has probability ≈ 8 × 10⁻¹¹; a real outage opens it within about 20 calls |
 
 ### Consequences
@@ -51,3 +51,8 @@ reliability counts fast errors; failures are independent between attempts.
 
 The values should be recomputed from measured p99.9 latency and error rates when the
 upstreams change or when metrics are available.
+
+The retry does not check how much of the request budget is left. A retry that cannot
+finish in time is cut off by the budget like any other call, so it costs the upstream
+one wasted request but never delays the response. If that load matters, a retry
+predicate can skip the retry when less than the upstream's p99 latency remains.

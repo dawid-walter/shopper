@@ -1,6 +1,6 @@
 # 10 · Proposal: Spring's @Retryable instead of the hand-written retry
 
-> Status: **proposal, not applied to the code plan yet**. Built on a copy of the code: 38 tests green; with `@EnableResilientMethods` switched off, `fastErrorIsRetriedOnce` fails, so the test really exercises the retry.
+> Status: **accepted and applied to the code plan** (ADR 0016 updated). Built on a copy of the code: 38 tests green; with `@EnableResilientMethods` switched off, `fastErrorIsRetriedOnce` fails, so the test really exercises the retry.
 
 ## What changes
 
