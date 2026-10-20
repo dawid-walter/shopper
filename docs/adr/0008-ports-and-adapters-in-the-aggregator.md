@@ -30,7 +30,8 @@ mocks and Pricing are outside the scope of this decision.
 Chosen option: "Ports and adapters", because inbound protocols and upstream sources
 both become adapters around one application service. Adding gRPC means adding another
 inbound adapter next to the REST controller, and adding a data source means adding a
-port and its adapter, with no change to the core.
+port and its adapter, with no change to how the core handles calls and failures
+(ADR 0017).
 
 Packages follow the layers `domain`, `application` (inbound and outbound ports,
 services), `infrastructure` (outbound adapters, configuration) and `presentation`

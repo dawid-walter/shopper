@@ -39,6 +39,8 @@ We plan **from the general to the specific**. A level is closed only once its de
 | Topic | State |
 |---|---|
 | Resilience parameters from latency and reliability ([07](#/07-resilience-math.md)) | ✅ ADR 0016 |
+| Typed ports with one shared fetch path; adding a source | ✅ ADR 0017 |
+| Contract tests | ❌ not now |
 
 Still later:
 
