@@ -36,6 +36,22 @@ ordered change feed; the aggregator polls it and stores the last processed offse
 the projection, which makes processing idempotent and replayable without a broker. On a
 projection miss the aggregator reads the catalog live.
 
+```mermaid
+flowchart LR
+  CAT["catalog-service"] -- "change feed<br/>events after offset" --> PROJ["projector<br/>(polls)"]
+  PROJ -- "upsert view + offset<br/>one transaction" --> PG[("Postgres<br/>catalog projection")]
+  READ(["aggregator<br/>read path"]) -- "1 · read" --> PG
+  READ -. "2 · on miss: live read" .-> CAT
+  READ -- "live, in parallel" --> LIVE["pricing · availability · customer"]
+
+  classDef up fill:#eef2ff,stroke:#4f46e5,color:#1e1b4b
+  classDef ours fill:#1f2937,stroke:#1f2937,color:#fff
+  classDef db fill:#fef3c7,stroke:#d97706,color:#78350f
+  class CAT,LIVE up
+  class PROJ,READ ours
+  class PG db
+```
+
 ### Consequences
 
 * Good, because a catalog outage no longer fails requests for products already

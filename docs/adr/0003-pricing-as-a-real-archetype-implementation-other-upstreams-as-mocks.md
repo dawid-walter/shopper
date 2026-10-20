@@ -31,6 +31,22 @@ assignment's 3–4 hour budget.
 Chosen option: "Pricing as a real archetype implementation, the others as mocks",
 because it shows the archetype where it pays off most and stays within the budget.
 
+```mermaid
+flowchart TB
+  subgraph sim["Same latency and failure simulation for every upstream"]
+    direction LR
+    PRI["<b>pricing-service</b><br/>real valuation archetype<br/>components · versions · rules"]
+    CAT["catalog-service<br/>fake API"]
+    AVA["availability-service<br/>fake API"]
+    CUS["customer-service<br/>fake API"]
+  end
+
+  classDef real fill:#e4002b,stroke:#9f0020,color:#fff
+  classDef mock fill:#f9fafb,stroke:#6b7280,color:#111827
+  class PRI real
+  class CAT,AVA,CUS mock
+```
+
 ### Consequences
 
 * Good, because Pricing's flexibility can be shown live: promotions, discounts and new

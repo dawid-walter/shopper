@@ -31,6 +31,28 @@ Chosen option: "Each upstream as a separate service, run in Docker", because onl
 separate processes talking over the network simulate the distributed system the
 assignment is about.
 
+```mermaid
+flowchart LR
+  subgraph chosen["Chosen · docker compose, one network"]
+    direction LR
+    AGG["product-aggregator"] -- "HTTP" --> CAT["catalog-service"]
+    AGG -- "HTTP" --> PRI["pricing-service"]
+    AGG -- "HTTP" --> AVA["availability-service"]
+    AGG -- "HTTP" --> CUS["customer-service"]
+  end
+  subgraph rejected["Rejected · one JVM"]
+    direction LR
+    AGG2["aggregator"] -- "method call" --> MOCKS["in-process mocks"]
+  end
+
+  classDef ours fill:#1f2937,stroke:#1f2937,color:#fff
+  classDef svc fill:#eef2ff,stroke:#4f46e5,color:#1e1b4b
+  classDef gone fill:#f3f4f6,stroke:#9ca3af,color:#6b7280,stroke-dasharray:4 3
+  class AGG ours
+  class CAT,PRI,AVA,CUS svc
+  class AGG2,MOCKS gone
+```
+
 ### Consequences
 
 * Good, because the aggregator deals with real network calls: timeouts, dropped

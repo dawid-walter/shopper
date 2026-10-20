@@ -31,6 +31,31 @@ Chosen option: "Synchronous REST calls to the upstreams, issued in parallel", be
 it returns current data, and calling in parallel keeps the response time close to the
 slowest upstream (~100 ms) instead of their sum (~290 ms).
 
+```mermaid
+sequenceDiagram
+  participant C as Client
+  participant A as Aggregator
+  participant CAT as Catalog
+  participant P as Pricing
+  participant V as Availability
+  participant U as Customer
+  C->>A: GET product (market, customer?)
+  par all at once
+    A->>CAT: product data
+  and
+    A->>P: price
+  and
+    A->>V: stock
+  and
+    A->>U: customer (only with a customer id)
+  end
+  CAT-->>A: ~50 ms
+  U-->>A: ~60 ms
+  P-->>A: ~80 ms
+  V-->>A: ~100 ms
+  A-->>C: product view after ~100 ms (sequential would be ~290 ms)
+```
+
 ### Consequences
 
 * Good, because upstream latency and failures reach the read path, where timeouts,
