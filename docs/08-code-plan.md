@@ -4,18 +4,18 @@
 
 > Status: **for review**. Every class and test that will be written, split into stages. Each stage is two commits: the tests first (red), then the implementation (green). Stages 0 and 6 are one commit each.
 >
-> The code below was **built and run before being published here**: Gradle build green, 37 tests passing, and the system checked end to end in Docker. What you read is what goes into the repository.
+> The code below was **built and run before being published here**: Gradle build green, 40 tests passing, and the system checked end to end in Docker. What you read is what goes into the repository.
 
 ## Stages
 
 | Stage | Adds | Tests | Depends on |
 |---|---|---|---|
-| 0 | Gradle skeleton, five bootable modules | context loads ×5 | — |
+| 0 | Gradle skeleton, five bootable modules with Actuator and tracing (ADR 0018) | context loads ×5 | — |
 | 1 | Catalog, Availability, Customer mocks | 7 | 0 |
 | 2 | Pricing model, service, in-memory storage | 3 (P1–P4) | 0 |
 | 3 | Pricing REST API | 2 (P5, P6) | 2 |
 | 4 | Aggregator domain, ports, service | 9 | 0 |
-| 5 | Aggregator adapters, config, REST API | 11 | 4 (contracts from 1, 3) |
+| 5 | Aggregator adapters, config, REST API, observability | 14 | 4 (contracts from 1, 3) |
 | 6 | Dockerfile, docker compose | by hand | 1, 3, 5 |
 
 Stages 1, 2 and 4 are independent of each other and can run in parallel.
@@ -100,9 +100,9 @@ Domain records, ports in and out, and `ProductViewService`: Scatter-Gather over 
 
 **Commits:** `test(aggregator): specify the aggregator over HTTP A1, A2, A5–A7, A10–A13` (tests, red) → `feat(aggregator): add REST adapters with timeouts and circuit breakers, and the product endpoint` (green)
 
-`UpstreamClient`: one per upstream, with its own timeout (p99.9) and circuit breaker; every failure leaves as `UpstreamException` (TIMEOUT, CIRCUIT_OPEN) or its subclass `FastUpstreamFailure` (5xx, refused connection), so HTTP and Resilience4j never reach the core. Each adapter method has Spring's `@Retryable(includes = FastUpstreamFailure.class, maxRetries = 1, delay = 0)`: fast errors are retried once, timeouts never. Four small adapters translate upstream JSON into domain records, reading only the fields they need. `ProductController` + `ErrorHandler` + `ProductResponse`, which turns each empty part of the view into a section status (`UNAVAILABLE`, `UNKNOWN`, `STANDARD`). `AggregatorConfig` is the only place that knows both sides; values from ADR 0016 in `application.yml`.
+`UpstreamClient`: one per upstream, with its own timeout (p99.9) and circuit breaker; every failure leaves as `UpstreamException` (TIMEOUT, CIRCUIT_OPEN) or its subclass `FastUpstreamFailure` (5xx, refused connection), so HTTP and Resilience4j never reach the core. Each adapter method has Spring's `@Retryable(includes = FastUpstreamFailure.class, maxRetries = 1, delay = 0)`: fast errors are retried once, timeouts never. Four small adapters translate upstream JSON into domain records, reading only the fields they need. `ProductController` + `ErrorHandler` + `ProductResponse`, which turns each empty part of the view into a section status (`UNAVAILABLE`, `UNKNOWN`, `STANDARD`). `AggregatorConfig` is the only place that knows both sides; values from ADR 0016 in `application.yml`. Observability (ADR 0018): `UpstreamClient` logs every failed call at `WARN`; the controller counts degraded sections; `TraceIdHeaderFilter` returns `X-Trace-Id`; the upstream executor carries the trace context to its virtual threads, so `traceparent` reaches every upstream.
 
-**Spec covered:** A1, A2, A5–A7, A10–A13 in `ProductEndpointComponentTest`: the whole app, upstreams stubbed by one WireMock server, circuit window 4 so A13 needs four requests. Plus the retry rule: a fast error is retried once, a timeout never.
+**Spec covered:** A1, A2, A5–A7, A10–A13 in `ProductEndpointComponentTest`: the whole app, upstreams stubbed by one WireMock server, circuit window 4 so A13 needs four requests. Plus the retry rule: a fast error is retried once, a timeout never. Plus observability: the trace id is returned and reaches every upstream, and a degraded section is counted.
 
 **Tests (commit 1):**
 
@@ -110,7 +110,7 @@ Domain records, ports in and out, and `ProductViewService`: Scatter-Gather over 
 
 **Implementation (commit 2):**
 
-`build.gradle.kts`, `UpstreamClient.java`, `AvailabilityRestClient.java`, `CatalogRestClient.java`, `CustomerRestClient.java`, `PricingRestClient.java`, `AggregatorConfig.java`, `AggregatorProperties.java`, `ErrorHandler.java`, `ProductController.java`, `ProductResponse.java`, `application.yml`
+`build.gradle.kts`, `UpstreamClient.java`, `AvailabilityRestClient.java`, `CatalogRestClient.java`, `CustomerRestClient.java`, `PricingRestClient.java`, `AggregatorConfig.java`, `AggregatorProperties.java`, `ErrorHandler.java`, `ProductController.java`, `ProductResponse.java`, `TraceIdHeaderFilter.java`, `application.yml`
 
 ## Stage 6 · Docker
 
@@ -137,11 +137,12 @@ Decided while writing the code; to confirm in review:
 7. **Extra classes** not on page 06: `UpstreamException`, `FastUpstreamFailure`, `UpstreamClient`, `AggregatorProperties`, `Applicability`.
 8. **Pricing is kept to a demo** of the archetype: one inbound port, tariffs as sample data, the API appends percentage versions only, three plus two example tests, no optimistic locking.
 9. **Spec additions:** two component tests for the retry rule (fast error retried once, timeout never).
-10. **Not in this plan:** Swagger UI, Toxiproxy, Grafana, the chaos skill and the README. They come after, as planned.
+10. **Found while checking end to end:** an error while reading an upstream's body (here a read timeout on a cold start) escaped as a raw `RestClientException`; `UpstreamClient` now turns any client error into an `UpstreamException`. Logs from the virtual threads had no trace id until the executor was wrapped with `ContextExecutorService`.
+11. **Not in this plan:** Swagger UI, Toxiproxy, Prometheus/Loki/Tempo/Grafana, the chaos skill and the README. They come after, as planned.
 
 ## Verification done
 
-- `./gradlew test`: 37 tests, all green (timing tests A10, A11 included).
+- `./gradlew test`: 40 tests, all green (timing tests A10, A11 included).
 - `docker compose up --build`, then:
 
 | Request | Result |
@@ -153,4 +154,5 @@ Decided while writing the code; to confirm in review:
 | `xx-XX` | `400` |
 | Pricing container stopped | `200`, `price: UNAVAILABLE`, in 0.39 s (cut by the pricing timeout) |
 | Catalog container stopped | `503` in 0.24 s |
+| Pricing stopped, `grep` by the `X-Trace-Id` of the response | the `WARN pricing call failed: TIMEOUT` line, logged on a virtual thread, carries the same trace id |
 | `POST /components/vat-pl/versions` 24% from 2027 | `201`, version 2; `GET /prices…&at=2027-01-02` gives VAT 24.00 |
