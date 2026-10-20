@@ -1,6 +1,6 @@
 # 04 · Module architecture: aggregator and pricing
 
-> Status: **proposal**. Both services use ports and adapters. Dashed boxes are not built: they show where gRPC and a message broker would plug in.
+> Status: **agreed** (ADR 0008, ADR 0015). Communication is synchronous REST today (ADR 0009); the broker is an option for later. Both services use ports and adapters. Dashed boxes are not built: they show where gRPC and a message broker would plug in.
 
 ## The rule
 

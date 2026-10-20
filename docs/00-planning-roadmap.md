@@ -12,6 +12,7 @@ We plan **from the general to the specific**. A level is closed only once its de
 | Monorepo with a module per service | ✅ ADR 0006 |
 | Gradle | ✅ ADR 0007 |
 | Ports and adapters in the aggregator | ✅ ADR 0008 |
+| Ports and adapters in Pricing; gRPC and broker as future adapters ([04](#/04-module-architecture.md)) | ✅ ADR 0015 |
 
 ## Level 2 · Communication ✅ closed (projection to be revisited in level 4)
 
