@@ -32,6 +32,10 @@ both become adapters around one application service. Adding gRPC means adding an
 inbound adapter next to the REST controller, and adding a data source means adding a
 port and its adapter, with no change to the core.
 
+Packages follow the layers `domain`, `application` (inbound and outbound ports,
+services), `infrastructure` (outbound adapters, configuration) and `presentation`
+(inbound adapters such as REST).
+
 ```mermaid
 flowchart LR
   subgraph in["Inbound adapters"]

@@ -34,6 +34,10 @@ each future transport: gRPC as an inbound adapter next to the REST controller, a
 as an outbound publisher in Pricing and an inbound listener in the aggregator. Adapters
 talk to adapters; the domain stays unaware of the transport.
 
+Packages follow the same layers as the aggregator (ADR 0008). The repository of the
+`PriceComponent` aggregate is declared in `domain`, because it stores the domain's own
+aggregate; outbound ports are reserved for other systems.
+
 ```mermaid
 flowchart LR
   REST["REST controller"] --> UC[/"CalculatePrice"/]

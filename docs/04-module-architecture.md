@@ -5,15 +5,16 @@
 ## The rule
 
 - **Domain + application** in the middle: no Spring Web, no HTTP, no broker.
-- **Inbound adapters** (REST today, gRPC tomorrow) call an **inbound port**, a use-case interface.
-- **Outbound adapters** (REST clients, repository, broker publisher) implement **outbound ports** declared by the application.
+- **Presentation** (inbound adapters: REST today, gRPC tomorrow, published integration events) calls an **inbound port**, a use-case interface.
+- **Infrastructure** (outbound adapters: REST clients, persistence, broker) implements **outbound ports** declared by the application, and **repositories** declared by the domain.
+- Outbound ports are for other systems; a repository is for the service's own aggregates.
 - A new protocol or transport = a new adapter. The middle does not change.
 
 ## Aggregator
 
 ```mermaid
 flowchart LR
-  subgraph in["adapter/in"]
+  subgraph in["presentation"]
     direction TB
     REST["rest<br/>ProductController"]
     GRPC["grpc<br/>ProductGrpcService"]
@@ -26,7 +27,7 @@ flowchart LR
     OUTP[/"CatalogPort · PricingPort<br/>AvailabilityPort · CustomerPort"/]
     UC --> SVC --> OUTP
   end
-  subgraph out["adapter/out"]
+  subgraph out["infrastructure"]
     direction TB
     C1["catalog REST client"]
     C2["pricing REST client"]
@@ -54,7 +55,7 @@ Package structure: [06 · Packages and flow](#/06-packages-and-flow.md).
 
 ```mermaid
 flowchart LR
-  subgraph in["adapter/in"]
+  subgraph in["presentation"]
     direction TB
     REST["rest<br/>PriceController"]
     GRPC["grpc<br/>PriceGrpcService"]
@@ -64,13 +65,13 @@ flowchart LR
     UC[/"CalculatePrice<br/>(inbound port)"/]
     SVC(["PricingService"])
     DOM["domain: valuation archetype<br/>calculators · components · validity"]
-    REPO[/"ComponentRepository<br/>(outbound port)"/]
+    REPO[/"ComponentRepository<br/>(domain repository)"/]
     PUB[/"PriceEvents<br/>(outbound port)"/]
     UC --> SVC --> DOM
     SVC --> REPO
     SVC -.-> PUB
   end
-  subgraph out["adapter/out"]
+  subgraph out["infrastructure"]
     direction TB
     MEM["persistence<br/>InMemoryComponentRepository"]
     KAFKA["messaging<br/>broker publisher"]

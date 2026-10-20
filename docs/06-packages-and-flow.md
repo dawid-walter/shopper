@@ -1,6 +1,6 @@
 # 06 · Packages and flow
 
-> Status: **proposal**. Main classes only; the tests mirror the [behaviour spec](#/05-behaviour-spec.md). Each service has its own `Market` and `Money`: no shared kernel between services.
+> Status: **agreed**. Layers: `domain` · `application` · `infrastructure` (outbound adapters, config) · `presentation` (inbound adapters). Main classes only; tests mirror the [behaviour spec](#/05-behaviour-spec.md). Each service has its own `Market` and `Money`: no shared kernel between services. Packages for future transports (`grpc`, `kafka`, `listener`, `integrationevent`) are not created until needed.
 
 ## Aggregator
 
@@ -20,36 +20,36 @@ product-aggregator/src/main/java/com/shopper/aggregator/
 │   ├── ProductNotFoundException  → 404
 │   └── CatalogUnavailableException → 503
 ├── application/
-│   ├── ProductViewService        parallel calls, time budget, builds ProductView
-│   └── port/
-│       ├── in/  GetProductView
-│       └── out/ CatalogPort, PricingPort, AvailabilityPort, CustomerPort
-├── adapter/
-│   ├── in/rest/
-│   │   ├── ProductController     GET /products/{id}?market&customerId
-│   │   ├── ProductResponse       JSON shape
-│   │   └── ErrorHandler          exceptions → 400 / 404 / 503
-│   └── out/
-│       ├── catalog/      CatalogRestClient       (+ upstream DTO)
-│       ├── pricing/      PricingRestClient
-│       ├── availability/ AvailabilityRestClient
-│       └── customer/     CustomerRestClient
-└── config/
-    ├── UpstreamClientsConfig     base URLs and timeout per upstream
-    └── ResilienceConfig          circuit breaker per upstream
+│   ├── port/in/   GetProductView
+│   ├── port/out/  CatalogPort, PricingPort, AvailabilityPort, CustomerPort
+│   └── service/   ProductViewService     parallel calls, time budget, builds ProductView
+├── infrastructure/
+│   ├── adapter/
+│   │   ├── catalog/      CatalogRestClient       (+ upstream DTO)
+│   │   ├── pricing/      PricingRestClient
+│   │   ├── availability/ AvailabilityRestClient
+│   │   └── customer/     CustomerRestClient
+│   └── config/
+│       ├── UpstreamClientsConfig  base URLs and timeout per upstream
+│       └── ResilienceConfig       circuit breaker per upstream
+└── presentation/
+    └── rest/
+        ├── ProductController      GET /products/{id}?market&customerId
+        ├── ProductResponse        JSON shape
+        └── ErrorHandler           exceptions → 400 / 404 / 503
 
 product-aggregator/src/test/java/com/shopper/aggregator/
-├── application/ProductViewServiceTest        unit: fake ports (A1, A3–A9)
-└── component/ProductEndpointComponentTest    whole app + WireMock (A1, A2, A5–A7, A10–A13)
+├── application/service/ProductViewServiceTest   unit: fake ports (A1, A3–A9)
+└── component/ProductEndpointComponentTest       whole app + WireMock (A1, A2, A5–A7, A10–A13)
 ```
 
 Where each concern lives:
 
 | Concern | Place |
 |---|---|
-| HTTP in / JSON / status codes | `adapter/in/rest` |
-| Timeout and circuit breaker per upstream | `adapter/out/*` + `config` |
-| Parallel calls, time budget, required vs optional | `application/ProductViewService` |
+| HTTP in / JSON / status codes | `presentation/rest` |
+| Timeout and circuit breaker per upstream | `infrastructure/adapter/*` + `infrastructure/config` |
+| Parallel calls, time budget, required vs optional | `application/service/ProductViewService` |
 | What a section looks like when data is missing | `domain` (the section types) |
 
 ## Pricing
@@ -70,25 +70,29 @@ pricing-service/src/main/java/com/shopper/pricing/
 │   │   ├── Validity              [from, to)
 │   │   ├── Applicability         markets, customers, products
 │   │   └── ComponentRole         LIST_PRICE, DISCOUNT, TAX
+│   ├── repository/
+│   │   └── ComponentRepository   repository of the PriceComponent aggregate
 │   ├── PriceQuote                net, VAT, gross + breakdown lines
 │   └── NotPricedException        → 404
 ├── application/
-│   ├── PricingService            picks applicable components at the moment, sums the breakdown
-│   └── port/
-│       ├── in/  CalculatePrice
-│       └── out/ ComponentRepository
-└── adapter/
-    ├── in/rest/
-    │   ├── PriceController       GET /prices/{productId}?market&customerId
-    │   └── PriceResponse
-    └── out/persistence/
-        ├── InMemoryComponentRepository
-        └── SeedData              shared test data: P-1001, C-42, VAT per market, flash sale
+│   ├── port/in/   CalculatePrice
+│   └── service/   PricingService   picks applicable components at the moment, sums the breakdown
+├── infrastructure/
+│   ├── persistence/
+│   │   ├── InMemoryComponentRepository
+│   │   └── SeedData              shared test data: P-1001, C-42, VAT per market, flash sale
+│   └── config/
+└── presentation/
+    └── rest/
+        ├── PriceController       GET /prices/{productId}?market&customerId
+        └── PriceResponse
 
 pricing-service/src/test/java/com/shopper/pricing/
-├── application/PricingServiceTest    examples P1–P4 (fixed clock)
-└── adapter/in/rest/PriceControllerTest  P5 over HTTP
+├── application/service/PricingServiceTest     examples P1–P4 (fixed clock)
+└── presentation/rest/PriceControllerTest      P5 over HTTP
 ```
+
+Pricing has no outbound port: it calls no other system. Its repository belongs to the domain, because it stores the domain's own aggregate.
 
 ## Aggregator request flow
 
@@ -137,5 +141,5 @@ flowchart TD
 ```
 
 Reading it in the interview:
-- **"A customer in Poland requests a product"**: the left-to-right path down the green boxes.
+- **"A customer in Poland requests a product"**: the path down the green boxes.
 - **"Pricing starts timing out"**: `PricingPort` times out (or its circuit is open), so `price: UNAVAILABLE` (amber). The response is still `200`, and it is never slower than the time budget.
