@@ -65,6 +65,14 @@ sequenceDiagram
 
 ## More Information
 
+The read path follows the **Scatter-Gather** pattern from Enterprise Integration Patterns
+(Hohpe & Woolf) in a simplified, in-process form: a fixed list of recipients is called in
+parallel, and the replies are combined once all have arrived or the request budget
+(ADR 0016) runs out. A full Scatter-Gather, with a Recipient List, an Aggregator that
+correlates replies and an explicit completion strategy, built for example with Spring
+Integration or Apache Camel, becomes worth it when recipients are reached over messaging
+or change at run time.
+
 Full CQRS was rejected because price and stock change too often for a lagging
 projection, and because a broker with publishers and consumers is not justified by the
 current requirements.
