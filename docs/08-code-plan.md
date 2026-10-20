@@ -16,7 +16,7 @@
 | 3 | Pricing REST API | 2 (P5, P6) | 2 |
 | 4 | Aggregator domain, ports, service | 9 | 0 |
 | 5 | Aggregator adapters, config, REST API, observability | 14 | 4 (contracts from 1, 3) |
-| 6 | Dockerfile, docker compose | by hand | 1, 3, 5 |
+| 6 | Dockerfile, docker compose, Swagger UI | by hand | 1, 3, 5 |
 
 Stages 1, 2 and 4 are independent of each other and can run in parallel.
 
@@ -112,17 +112,17 @@ Domain records, ports in and out, and `ProductViewService`: Scatter-Gather over 
 
 `build.gradle.kts`, `UpstreamClient.java`, `AvailabilityRestClient.java`, `CatalogRestClient.java`, `CustomerRestClient.java`, `PricingRestClient.java`, `AggregatorConfig.java`, `AggregatorProperties.java`, `ErrorHandler.java`, `ProductController.java`, `ProductResponse.java`, `TraceIdHeaderFilter.java`, `application.yml`
 
-## Stage 6 · Docker
+## Stage 6 · Docker and Swagger UI
 
-**Commits:** `build(docker): run the whole system with docker compose` (one commit: verified by running it)
+**Commits:** `build(docker): run the whole system with docker compose and expose Swagger UI` (one commit: verified by running it)
 
-One Dockerfile for every module (build stage with the Gradle wrapper, JRE runtime stage) and `docker-compose.yml` with the five services; the aggregator gets upstream URLs through environment variables. `docker compose up --build` is the only setup.
+One Dockerfile for every module (build stage with the Gradle wrapper, JRE runtime stage) and `docker-compose.yml` with the five services; the aggregator gets upstream URLs through environment variables, and every container logs JSON. The root build adds springdoc, so each service serves Swagger UI at `/swagger-ui.html` (aggregator: `localhost:8080`, Pricing: `localhost:8082` for adding a VAT version by hand). `docker compose up --build` is the only setup.
 
 **Spec covered:** Checked by hand, see Verification.
 
 **Files:**
 
-`Dockerfile`, `dot-dockerignore`, `docker-compose.yml`
+`Dockerfile`, `build.gradle.kts`, `docker-compose.yml`, `dockerignore`
 
 ## Where the code differs from earlier pages
 
@@ -138,7 +138,7 @@ Decided while writing the code; to confirm in review:
 8. **Pricing is kept to a demo** of the archetype: one inbound port, tariffs as sample data, the API appends percentage versions only, three plus two example tests, no optimistic locking.
 9. **Spec additions:** two component tests for the retry rule (fast error retried once, timeout never).
 10. **Found while checking end to end:** an error while reading an upstream's body (here a read timeout on a cold start) escaped as a raw `RestClientException`; `UpstreamClient` now turns any client error into an `UpstreamException`. Logs from the virtual threads had no trace id until the executor was wrapped with `ContextExecutorService`.
-11. **Not in this plan:** Swagger UI, Toxiproxy, Prometheus/Loki/Tempo/Grafana, the chaos skill and the README. They come after, as planned.
+11. **Not in this plan:** Toxiproxy, Prometheus/Loki/Tempo/Grafana, the chaos skill and the README. They come after, as planned.
 
 ## Verification done
 
@@ -155,4 +155,5 @@ Decided while writing the code; to confirm in review:
 | Pricing container stopped | `200`, `price: UNAVAILABLE`, in 0.39 s (cut by the pricing timeout) |
 | Catalog container stopped | `503` in 0.24 s |
 | Pricing stopped, `grep` by the `X-Trace-Id` of the response | the `WARN pricing call failed: TIMEOUT` line, logged on a virtual thread, carries the same trace id |
+| Swagger UI on 8080 and 8082 | `200`; the aggregator documents `/products/{productId}`, Pricing `/prices/{productId}` and `/components/{componentId}/versions` |
 | `POST /components/vat-pl/versions` 24% from 2027 | `201`, version 2; `GET /prices…&at=2027-01-02` gives VAT 24.00 |
