@@ -1,0 +1,45 @@
+---
+status: "proposed"
+date: 2026-10-20
+decision-makers:
+consulted:
+informed:
+---
+
+# Synchronous REST with parallel fan-out on the read path
+
+## Context and Problem Statement
+
+When a client asks for a product, the aggregator needs data from the upstreams (Catalog,
+Pricing, Availability, Customer). We have to decide how the read path obtains it.
+
+## Decision Drivers
+
+* The client wants the product now, with current price and stock.
+* The response time should stay reasonable even when upstreams are slow.
+* The assignment evaluates how partial upstream failures are handled.
+
+## Considered Options
+
+* Synchronous REST calls to the upstreams, issued in parallel
+* Reading everything from the aggregator's own projections, fed by upstream events
+  (full CQRS)
+
+## Decision Outcome
+
+Chosen option: "Synchronous REST calls to the upstreams, issued in parallel", because
+it returns current data, and calling in parallel keeps the response time close to the
+slowest upstream (~100 ms) instead of their sum (~290 ms).
+
+### Consequences
+
+* Good, because upstream latency and failures reach the read path, where timeouts,
+  circuit breakers and graceful degradation handle them.
+* Bad, because the aggregator's availability depends on the upstreams, which is what
+  those patterns have to compensate for.
+
+## More Information
+
+Full CQRS was rejected because price and stock change too often for a lagging
+projection, and because a broker with publishers and consumers does not fit the budget.
+The slow-changing catalog is the exception, covered by ADR 0010.

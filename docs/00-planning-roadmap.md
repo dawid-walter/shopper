@@ -13,13 +13,13 @@ We plan **from the general to the specific**. A level is closed only once its de
 | Gradle | ✅ ADR 0007 |
 | Ports and adapters in the aggregator | ✅ ADR 0008 |
 
-## Level 2 · Communication
+## Level 2 · Communication ✅ closed (projection to be revisited in level 4)
 
 | Topic | State |
 |---|---|
-| Read path: synchronous REST, parallel fan-out | 🟡 proposed in [01 §3](#/01-big-picture.md), no ADR yet |
-| State in the aggregator: projections in Postgres, which variant | ⬜ open: [01 §7a](#/01-big-picture.md), (d) CQRS light recommended |
-| Asynchronous channel (only if a projection is chosen) | ⬜ follows from the above |
+| Read path: synchronous REST, parallel fan-out | ✅ ADR 0009 |
+| Catalog projection in Postgres (CQRS light) | ✅ ADR 0010, provisional |
+| Asynchronous channel: change feed polled over HTTP, no broker | ✅ ADR 0010 |
 
 ## Level 3 · Domain modelling
 

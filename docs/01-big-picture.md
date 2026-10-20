@@ -15,6 +15,8 @@
 | Monorepo with a module per service | [0006](#/adr/0006-monorepo-for-all-services.md) |
 | Gradle | [0007](#/adr/0007-gradle-as-the-build-tool.md) |
 | Ports and adapters in the aggregator | [0008](#/adr/0008-ports-and-adapters-in-the-aggregator.md) |
+| Synchronous REST with parallel fan-out on the read path | [0009](#/adr/0009-synchronous-rest-with-parallel-fan-out-on-the-read-path.md) |
+| Catalog projection fed by a change feed (CQRS light, provisional) | [0010](#/adr/0010-catalog-projection-in-the-aggregator-fed-by-a-change-feed.md) |
 
 ## 2. System map
 
@@ -203,9 +205,8 @@ Recommendation: **(d) instead of (b)**, not both. It shows CQRS where it fits (s
 
 ## 8. Open questions
 
-1. **Postgres in the aggregator:** variant (a), (b), (c) or (d) from §7a?
-2. **Customer segment for discounts:** from the contract in Pricing, or passed in by the aggregator? (details in [02](#/02-pricing.md))
-3. **Language and market:** a language fallback (e.g. missing `pl` translation → `en`)? Currency derived from the market (`pl-PL` → PLN)?
-4. The message cut off at "główna fun…". What was meant to follow?
+1. **Customer segment for discounts:** from the contract in Pricing, or passed in by the aggregator? (details in [02](#/02-pricing.md))
+2. **Language and market:** a language fallback (e.g. missing `pl` translation → `en`)? Currency derived from the market (`pl-PL` → PLN)?
+3. The message cut off at "główna fun…". What was meant to follow?
 
-Resolved: ~~depth of DDD and archetypes in the mocks~~ → ADR 0003 · ~~versions~~ → ADR 0005 · ~~repository layout~~ → ADR 0006, 0007.
+Resolved: ~~depth of DDD and archetypes in the mocks~~ → ADR 0003 · ~~versions~~ → ADR 0005 · ~~repository layout~~ → ADR 0006, 0007 · ~~Postgres variant~~ → ADR 0010.
