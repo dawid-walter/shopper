@@ -1,0 +1,169 @@
+# 01 · Big picture: first planning pass
+
+> Status: **draft for discussion**. Settled points go into the [ADRs](#/adr/0000-java-and-spring-boot-as-the-technology-stack.md); open ones are at the bottom of the page.
+
+## 1. Settled
+
+| Decision | ADR |
+|---|---|
+| Java + Spring Boot | [0000](#/adr/0000-java-and-spring-boot-as-the-technology-stack.md) |
+| REST only, no gRPC | [0001](#/adr/0001-rest-only-no-grpc.md) |
+| Each upstream is a separate service in Docker | [0002](#/adr/0002-upstreams-as-separate-services-in-docker.md) |
+| Pricing is a real archetype, the rest are mocks ([design](#/02-pricing.md)) | [0003](#/adr/0003-pricing-as-a-real-archetype-implementation-other-upstreams-as-mocks.md) |
+
+## 2. System map
+
+```mermaid
+flowchart LR
+  subgraph clients[Clients]
+    W[web]
+    M[mobile]
+    D[dealer tools]
+  end
+  subgraph compose[docker compose]
+    AGG[product-aggregator<br/>REST · Spring Web]
+    CAT[catalog-service]
+    PRI[pricing-service]
+    AVA[availability-service]
+    CUS[customer-service]
+  end
+  W & M & D -->|GET /products/id?market=pl-PL&customerId=…| AGG
+  AGG ==>|REST · REQUIRED| CAT
+  AGG -->|REST · optional| PRI
+  AGG -->|REST · optional| AVA
+  AGG -.->|REST · only with customerId| CUS
+```
+
+| Service | Responsibility | Archetype candidate | When it fails |
+|---|---|---|---|
+| **product-aggregator** | composes the response, enforces the time budget, degrades sections | — (the core of the assignment) | — |
+| catalog-service | product data localised for the market/language | **Product** | the whole request fails |
+| pricing-service | base price, customer discount, final price in the market's currency | **Pricing** | `price: UNAVAILABLE` |
+| availability-service | stock per warehouse, delivery estimate | **Inventory** | `stock: UNKNOWN` |
+| customer-service | segment, preferences | **Party** | non-personalised response |
+
+## 3. Communication: synchronous or asynchronous?
+
+**Recommendation: the read path is synchronous (REST); asynchrony is a README topic only.**
+
+| | Synchronous (REST) | Asynchronous (events, Kafka/Rabbit) |
+|---|---|---|
+| Fits | the "show me the product now" query | propagating changes (price, stock) into a local copy |
+| Data freshness | always current | eventual consistency |
+| Dependence on upstream availability | full, hence the patterns in §4 | none: we read our own read model |
+| Cost within 3–4 h | small | large: broker, consumers, read model |
+| Where it lives here | **implemented** | described in the README (design question B: flash sales) |
+
+The aggregator follows the **API Composition / Scatter-Gather** pattern; in practice it is a Backend-for-Frontend shared by all clients. Calls go out **in parallel**, so the response time is roughly the slowest upstream (~100 ms), not the sum (~290 ms).
+
+The asynchronous alternative is **CQRS / a materialized view**: upstreams publish events and the aggregator keeps a ready-made product view. Reads become fast and failure-resistant, but prices and stock go stale and a broker joins the system. Good material for the interview and the README, not for implementation.
+
+## 4. Protection: patterns
+
+| Pattern | Protects against | How we apply it | Tool |
+|---|---|---|---|
+| **Per-upstream timeout** | a slow upstream holding up the response | a separate timeout per service, derived from its latency | `RestClient` / HTTP client |
+| **Whole-request budget (deadline)** | timeouts and retries adding up | e.g. 500 ms in total; whatever misses it is degraded | `CompletableFuture.orTimeout` |
+| **Parallel fan-out** | latencies adding up | all calls at once | virtual threads + `CompletableFuture` |
+| **Fallback / graceful degradation** | an optional upstream failing | a section with status `UNAVAILABLE` instead of an error | our own response model |
+| **Circuit breaker** | hammering a dead service and waiting for the timeout on every request | an open CB means an immediate fallback | Resilience4j |
+| **Retry (carefully)** | transient errors | GET only, at most 1 retry with jitter, **only if it fits the budget** | Resilience4j |
+| **Bulkhead** | a slow upstream consuming every thread/connection | a cap on concurrent calls per upstream | Resilience4j |
+| **Cache (stale-on-error)** | catalog failures and load | the catalog changes rarely: short TTL, serve the stale copy on failure (optional) | Caffeine |
+| **Correlation ID** | debugging a distributed request | a header propagated to upstreams and into logs | MDC + interceptor |
+| **Metrics and health** | operating the service | latency, errors and CB state per upstream | Actuator + Micrometer |
+
+Numbers for the interview: Availability is 98% reliable, so **one** retry raises that to ~99.96% (if failures are independent). A retry only makes sense when it fits the budget, though; otherwise it just turns an error into a timeout.
+
+**Required or optional?** Each upstream is described by a policy: *required*, *optional* or *conditional* (Customer only with a `customerId`). The aggregator has no `if`s for specific services. Adding a new source (e.g. Related Products from question A) means a new adapter and a policy, with no changes to the core.
+
+**Catalog: two distinct cases**
+- the product does not exist → `404`;
+- the catalog does not respond → `503`/`502`.
+
+These are different situations and the client should be able to tell them apart.
+
+## 5. Interview scenarios
+
+### "A customer in Poland requests a product"
+
+```mermaid
+sequenceDiagram
+  participant K as Client
+  participant A as Aggregator
+  participant C as Catalog
+  participant P as Pricing
+  participant V as Availability
+  participant U as Customer
+  K->>A: GET /products/123?market=pl-PL&customerId=42
+  par in parallel, 500 ms budget
+    A->>C: GET /products/123?locale=pl-PL
+    A->>P: GET /prices/123?market=PL&customerId=42
+    A->>V: GET /stock/123?market=PL
+    A->>U: GET /customers/42
+  end
+  C-->>A: Polish name/description (50 ms)
+  U-->>A: segment DEALER (60 ms)
+  P-->>A: price in PLN with discount (80 ms)
+  V-->>A: stock and delivery (100 ms)
+  A-->>K: 200 · all sections OK (~100 ms)
+```
+
+### "The Pricing Service starts timing out"
+
+```mermaid
+sequenceDiagram
+  participant K as Client
+  participant A as Aggregator
+  participant P as Pricing
+  K->>A: GET /products/123?market=pl-PL
+  A->>P: GET /prices/123
+  Note over A,P: no response within the limit (e.g. 250 ms)
+  A-->>K: 200 · product + price: UNAVAILABLE
+  Note over A: repeated timeouts open the circuit breaker
+  K->>A: GET /products/123
+  A-->>K: 200 · price: UNAVAILABLE immediately, no waiting (~100 ms)
+  Note over A,P: after a while the CB goes half-open and tries again
+```
+
+The customer **always sees the product**, with the price marked as unavailable. With the CB open the response is even faster than normal, because nobody waits for a timeout.
+
+## 6. Mocks: where they judge our understanding of distributed systems
+
+- **Latency as a distribution, not a constant.** The median equals the assignment's "typical latency", with a long tail: p99 several times higher.
+- **Different kinds of failure:**
+  - fast 5xx;
+  - hangs (timeout);
+  - slow responses;
+  - selected cases: bad data / 404.
+- **Failure rates** matching the reliability table (Catalog 0.1%, Pricing 0.5%, Availability 2%, Customer 1%).
+- **Chaos control**, e.g. `POST /chaos` or environment variables: "Pricing has 100% timeouts". It lets us show the scenarios live and write deterministic tests.
+
+## 7. Scope (settled)
+
+- **Aggregator**: a proper architecture (ports and adapters), required/optional policies, resilience, tests.
+- **Pricing**: a real implementation of the archetype, described in [02 · Pricing](#/02-pricing.md).
+- **Catalog, Availability, Customer**: mocks with a fake API and the realistic network behaviour from §6.
+- Pricing gets the same latency and failure simulation as the mocks.
+
+## 7a. Where state lives (Postgres, projections, read models)
+
+| Component | State | Where |
+|---|---|---|
+| Aggregator | none, composes the response live | possibly a short in-memory cache |
+| Pricing | components, versions, price lists, contracts | **Postgres** (proposal) |
+| Mocks | test data | in memory / seeded from JSON |
+
+Projections and read models would only appear in the asynchronous variant (CQRS, §3). The aggregator would then keep a ready-made product view in Postgres, updated by events. We do not implement that variant; we describe it in the README.
+
+## 8. Open questions
+
+1. **Postgres for Pricing only** (§7a): yes?
+2. **Customer segment for discounts:** from the contract in Pricing, or passed in by the aggregator? (details in [02](#/02-pricing.md))
+3. **Versions:** Java 21 + Spring Boot 3.5 or Java 25 + Spring Boot 4? Resilience4j support needs checking.
+4. **Design question:** I recommend **B (flash sales)**, because it showcases the Pricing archetype directly.
+5. **Repository layout:** a monorepo with Gradle/Maven modules and a single `docker compose up`?
+6. **Language and market:** a language fallback (e.g. missing `pl` translation → `en`)? Currency derived from the market (`pl-PL` → PLN)?
+7. The message cut off at "główna fun…". What was meant to follow?
+
+Resolved: ~~depth of DDD and archetypes in the mocks~~ → ADR 0003.
