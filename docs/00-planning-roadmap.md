@@ -20,6 +20,7 @@ We plan **from the general to the specific**. A level is closed only once its de
 | Read path: synchronous REST, parallel fan-out | ✅ ADR 0009 |
 | Catalog projection in Postgres (CQRS light) | ✅ ADR 0010, provisional |
 | Asynchronous channel: change feed polled over HTTP, no broker | ✅ ADR 0010 |
+| Upstream latency and failures simulated by Toxiproxy | ✅ ADR 0014 |
 
 ## Level 3 · Domain modelling
 
