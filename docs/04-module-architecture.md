@@ -48,17 +48,7 @@ flowchart LR
   class GRPC,MSG future
 ```
 
-```
-com.shopper.aggregator
-├── domain/            ProductView, sections, Market
-├── application/       ProductViewService
-│   └── port/
-│       ├── in/        GetProductView
-│       └── out/       CatalogPort, PricingPort, AvailabilityPort, CustomerPort
-└── adapter/
-    ├── in/rest/       ProductController
-    └── out/           catalog/, pricing/, availability/, customer/  (REST clients + resilience)
-```
+Package structure: [06 · Packages and flow](#/06-packages-and-flow.md).
 
 ## Pricing
 
@@ -102,17 +92,7 @@ flowchart LR
   class GRPC,KAFKA,PUB future
 ```
 
-```
-com.shopper.pricing
-├── domain/            Money, Calculator, PriceComponent, Validity, Applicability
-├── application/       PricingService
-│   └── port/
-│       ├── in/        CalculatePrice
-│       └── out/       ComponentRepository
-└── adapter/
-    ├── in/rest/       PriceController
-    └── out/persistence/  InMemoryComponentRepository
-```
+Package structure: [06 · Packages and flow](#/06-packages-and-flow.md).
 
 ## Future broker: who talks to whom
 
