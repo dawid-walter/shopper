@@ -11,7 +11,7 @@ Goal: show the concepts, not cover every case. Details are explained in the inte
 | 5 | Catalog projection (CQRS light) | 0:30 |
 | 6 | README with decisions, trade-offs and the design question | 0:30 |
 
-**Demo, if time allows:** Toxiproxy injecting latency and failures with the assignment's figures (ADR 0014) + Prometheus/Grafana dashboard (per-upstream latency, errors, circuit breaker state, degraded sections). The demo closes by comparing measured values with the predictions on [07](#/07-resilience-math.md): ~99.6% complete responses, nothing slower than 500 ms, no spurious circuit-breaker trips.
+**Demo, if time allows:** Toxiproxy injecting latency and failures with the assignment's figures (ADR 0014) + Prometheus/Grafana dashboard (per-upstream latency, errors, circuit breaker state, degraded sections). The demo closes by comparing measured values with the predictions on [07](#/07-resilience-math.md): ~99.6% complete responses, nothing slower than 500 ms, no spurious circuit-breaker trips. Live feel through Swagger UI (springdoc) on the aggregator; the percentages need volume, so a short load loop (e.g. `hey` or k6) feeds Grafana.
 
 **Last, after the demo:** a project skill in `.claude/skills/` for chaos testing this environment: switch Toxiproxy scenarios and stop services one by one, call the aggregator, and report what the client sees at each step (with the Grafana view alongside).
 
