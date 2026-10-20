@@ -37,7 +37,7 @@ Markets: `pl-PL` (PLN, VAT 23%), `de-DE` (EUR, VAT 19%), `nl-NL` (EUR, VAT 21%).
 ## Pricing
 
 - `GET /prices/{productId}?market=…&customerId=…&at=…`: `at` (optional, default now) prices at a given moment, e.g. a future VAT change.
-- `POST /components/{componentId}/versions`: adds a version (calculator, validity, applicability) with `expectedVersion` for optimistic locking.
+- `POST /components/{componentId}/versions`: adds a percentage version (rate, validity, markets/products/customers) with `expectedVersion` for optimistic locking.
 
 Single example tests on the domain (pure, no Spring), plus one over HTTP.
 
