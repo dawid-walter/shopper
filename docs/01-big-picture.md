@@ -168,11 +168,39 @@ The customer **always sees the product**, with the price marked as unavailable. 
 | Cost within 3–4 h | **too large**: it alone fills the budget | medium (~45 min) | none |
 | Fit with flash sales (B) | risky: a lagging price is a wrong price | per source: stale stock is acceptable, a stale price is not | fine |
 
-Recommendation: **(b)** if we want Postgres in the aggregator, with a **per-source staleness policy** (stock may be served stale with a timestamp, price never). (a) goes into the README as the "with more time" direction.
+Why not full CQRS (a) for everything:
+- **It sidesteps what they evaluate.** If every read hits our own Postgres, the upstreams' latency and reliability never reach the read path, so timeouts, partial failures and degradation stop mattering.
+- **Price and stock change fast** (flash sales, live stock). A projection lagging by seconds shows wrong prices.
+- **Cost.** A broker, publishers in four services, consumers, idempotency and replay fill the budget by themselves.
+
+### (d) CQRS light: project only the catalog
+
+Split the sources by how fast they change:
+
+| Source | Changes | How the aggregator reads it |
+|---|---|---|
+| Catalog | rarely (name, specs, images) | **projection in Postgres**, fed by catalog change events |
+| Pricing, Availability, Customer | constantly / per request | **live**, with the resilience patterns from §4 |
+
+```mermaid
+flowchart LR
+  CAT[catalog-service] -->|"change feed<br/>GET /events?after=offset"| PROJ[catalog projector]
+  PROJ --> PG[(Postgres<br/>product_view per locale<br/>+ last offset)]
+  AGG[aggregator read path] -->|read| PG
+  AGG -.->|miss: read-through| CAT
+  AGG -->|live| PRI[pricing] & AVA[availability] & CUS[customer]
+```
+
+- **Transport without a broker:** the catalog exposes an ordered change feed (`GET /events?after=<offset>`); the aggregator polls it, upserts the projection and stores the last offset in the same transaction. That gives idempotency and replay with no Kafka/Rabbit. A broker is the README's "production" answer.
+- **Projection miss** (a new product not projected yet): read-through to the live catalog, so lag never turns into a false 404.
+- **What it buys:** the only *required* upstream drops off the hot path. A catalog outage no longer fails requests for products already projected.
+- **What it costs:** ~1–1.5 h (Postgres, Flyway, projector, feed endpoint in the catalog mock), and a deliberate reinterpretation of the constraint "if Catalog fails, the request fails". It still holds for products we have never seen; it has to be argued in the interview, not hidden.
+
+Recommendation: **(d) instead of (b)**, not both. It shows CQRS where it fits (slow-changing, required data) and live aggregation where it fits (fast-changing, optional data), which is the more interesting trade-off to defend. If the budget gets tight, (b) is the fallback.
 
 ## 8. Open questions
 
-1. **Postgres in the aggregator:** variant (a), (b) or (c) from §7a?
+1. **Postgres in the aggregator:** variant (a), (b), (c) or (d) from §7a?
 2. **Customer segment for discounts:** from the contract in Pricing, or passed in by the aggregator? (details in [02](#/02-pricing.md))
 3. **Design question:** I recommend **B (flash sales)**.
 4. **Repository layout:** a monorepo with Gradle/Maven modules and a single `docker compose up`?
