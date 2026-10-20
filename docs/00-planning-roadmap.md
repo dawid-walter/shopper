@@ -34,10 +34,15 @@ We plan **from the general to the specific**. A level is closed only once its de
 | Who owns the customer discount and segment | ⬜ open: [01 §8](#/01-big-picture.md) |
 | Upstream contracts (what each mock returns) | ⬜ |
 
-## Level 4 · Details (later)
+## Level 4 · Details
 
-Not to be discussed before levels 1–3 are closed:
-- resilience parameters (timeouts, budget, CB, retry), caching;
+| Topic | State |
+|---|---|
+| Resilience parameters from latency and reliability ([07](#/07-resilience-math.md)) | ✅ ADR 0016 |
+
+Still later:
+
+- caching;
 - API contract and error model;
 - observability, tests, docker compose;
 - README and the design question.
