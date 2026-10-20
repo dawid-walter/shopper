@@ -54,7 +54,7 @@ flowchart LR
 | Data freshness | always current | eventual consistency |
 | Dependence on upstream availability | full, hence the patterns in §4 | none: we read our own read model |
 | Cost within 3–4 h | small | large: broker, consumers, read model |
-| Where it lives here | **implemented** | described in the README (design question B: flash sales) |
+| Where it lives here | **implemented** | described in the README |
 
 The aggregator follows the **API Composition / Scatter-Gather** pattern; in practice it is a Backend-for-Frontend shared by all clients. Calls go out **in parallel**, so the response time is roughly the slowest upstream (~100 ms), not the sum (~290 ms).
 
@@ -166,7 +166,7 @@ The customer **always sees the product**, with the price marked as unavailable. 
 | Freshness | event lag (seconds) | live; stale only during a failure | live |
 | Extra pieces | broker (Kafka/Rabbit), publishers in every upstream, consumers, idempotency, replay | Postgres, Flyway, one table per source | none |
 | Cost within 3–4 h | **too large**: it alone fills the budget | medium (~45 min) | none |
-| Fit with flash sales (B) | risky: a lagging price is a wrong price | per source: stale stock is acceptable, a stale price is not | fine |
+| Fit with fast-changing prices | risky: a lagging price is a wrong price | per source: stale stock is acceptable, a stale price is not | fine |
 
 Why not full CQRS (a) for everything:
 - **It sidesteps what they evaluate.** If every read hits our own Postgres, the upstreams' latency and reliability never reach the read path, so timeouts, partial failures and degradation stop mattering.
@@ -202,9 +202,8 @@ Recommendation: **(d) instead of (b)**, not both. It shows CQRS where it fits (s
 
 1. **Postgres in the aggregator:** variant (a), (b), (c) or (d) from §7a?
 2. **Customer segment for discounts:** from the contract in Pricing, or passed in by the aggregator? (details in [02](#/02-pricing.md))
-3. **Design question:** I recommend **B (flash sales)**.
-4. **Repository layout:** a monorepo with Gradle/Maven modules and a single `docker compose up`?
-5. **Language and market:** a language fallback (e.g. missing `pl` translation → `en`)? Currency derived from the market (`pl-PL` → PLN)?
-6. The message cut off at "główna fun…". What was meant to follow?
+3. **Repository layout:** a monorepo with Gradle/Maven modules and a single `docker compose up`?
+4. **Language and market:** a language fallback (e.g. missing `pl` translation → `en`)? Currency derived from the market (`pl-PL` → PLN)?
+5. The message cut off at "główna fun…". What was meant to follow?
 
 Resolved: ~~depth of DDD and archetypes in the mocks~~ → ADR 0003 · ~~versions~~ → ADR 0005.

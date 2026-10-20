@@ -60,8 +60,6 @@ The same through the API, as a breakdown:
 | **"Why this price?"** | reading the code | a breakdown with formulas in the response |
 | **A past price** | logs | versions with `validity`, so history follows from the model |
 
-Conclusion for the design question: **B (flash sales) and C (new markets) both showcase this archetype directly.** I recommend **B**: it also touches the aggregator, because caching prices becomes a problem when they change every few minutes.
-
 ## Where does Pricing get customer data from?
 
 The customer discount is **Pricing's data**: a discount contract keyed by `customerId`. Pricing **does not call** the Customer Service. As a result:
