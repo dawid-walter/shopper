@@ -52,7 +52,7 @@ Three plain services with fixed sample data shared by all services (spec page 05
 
 **Commits:** `test(pricing): specify pricing behaviour P1–P4` (tests, red) → `feat(pricing): implement the pricing model, service and in-memory storage` (green)
 
-Pricing is a **demo of the valuation archetype**, kept small: `Calculator` (sealed: Fixed, Percentage) is pure maths; `PriceComponent` gives it a role (LIST_PRICE, DISCOUNT, TAX) and holds immutable versions with `Validity` and `Applicability`; `Tariff` is the composite, the ordered component ids of a market, so discounts come before VAT. `PriceQuote` sums the breakdown lines and refuses a price without a list price or a tax. A write appends a version atomically through `ComponentRepository.update` (ADR 0013); no optimistic locking, since nothing is edited from a stale read. Tariffs are plain sample data; components live in memory (ADR 0004). One inbound port, `PricingUseCase`.
+Pricing is a **demo of the valuation archetype**, kept small: `Calculator` (sealed: Fixed, Percentage) is pure maths; `PriceComponent` gives it a role (LIST_PRICE, DISCOUNT, TAX) and holds immutable versions with `Validity` and `Applicability`; `Tariff` is the composite, the ordered component ids of a market, so discounts come before VAT. `PriceQuote` sums the breakdown lines and refuses a price without a list price or a tax. A write reads the component, appends a version and saves it (ADR 0013); concurrent writers are out of scope. Tariffs are plain sample data; components live in memory (ADR 0004). One inbound port, `PricingUseCase`.
 
 **Spec covered:** P1–P4 in `PricingServiceTest` (three tests, fixed clock).
 
