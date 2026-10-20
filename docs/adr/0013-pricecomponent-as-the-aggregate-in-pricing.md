@@ -19,7 +19,7 @@ boundary lies.
 ## Decision Drivers
 
 * An aggregate belongs where a write must uphold an invariant under concurrent changes,
-  not where it merely demonstrates DDD.
+  and nowhere else.
 * Per the archetype, a component keeps a stable identity while its configuration is
   versioned, and composite components refer to their parts by id.
 

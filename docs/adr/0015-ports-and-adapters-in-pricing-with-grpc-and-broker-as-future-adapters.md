@@ -54,7 +54,7 @@ flowchart LR
 
 ### Consequences
 
-* Good, because the interview answer "how would you add gRPC or Kafka?" points at a
-  concrete slot rather than a refactoring.
+* Good, because adding gRPC or a broker later means adding an adapter in a known place
+  rather than refactoring.
 * Neutral, because the future adapters exist only in diagrams and the README; no empty
   packages or unused interfaces are created.

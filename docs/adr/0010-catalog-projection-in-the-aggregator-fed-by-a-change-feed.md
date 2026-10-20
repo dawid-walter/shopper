@@ -18,7 +18,7 @@ and how the projection is fed, given that the read path stays synchronous (ADR 0
 * Catalog data (name, description, specs, images) changes rarely; price and stock
   change constantly.
 * Catalog is the only required upstream: its failure fails the request.
-* The budget is 3–4 hours.
+* The first version has limited time.
 
 ## Considered Options
 
@@ -57,10 +57,11 @@ flowchart LR
 * Good, because a catalog outage no longer fails requests for products already
   projected.
 * Bad, because it reinterprets the constraint "if Catalog fails, the request fails": it
-  still holds for products not yet projected, and has to be argued in the interview.
+  still holds for products not yet projected, and has to be agreed with the product
+  owner.
 * Bad, because it adds Postgres, migrations and a projector to the aggregator.
 
 ## More Information
 
-Accepted provisionally: the author will revisit it while planning the details. If the
-budget gets tight, the fallback is the last-known-good snapshot.
+Provisional: to be revisited while planning the details. If time gets tight, the
+fallback is the last-known-good snapshot.

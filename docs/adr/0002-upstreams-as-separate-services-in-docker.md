@@ -11,14 +11,15 @@ informed:
 ## Context and Problem Statement
 
 The aggregator combines data from four upstreams (Catalog, Pricing, Availability,
-Customer) that have to be mocked. The assignment says outright that the mocks are how
-they will judge our understanding of distributed systems. We have to decide where the
-mocks run.
+Customer) owned by other teams. They are not available for local development and
+testing, so they are simulated. The simulation has to reproduce how a distributed
+system behaves: network latency, timeouts and failures. We have to decide where the
+simulated upstreams run.
 
 ## Decision Drivers
 
 * The problem is distributed by nature, so the simulation should reflect that.
-* The assignment requires running it locally with minimal setup.
+* Developers must be able to run the whole system locally with minimal setup.
 
 ## Considered Options
 
@@ -29,7 +30,7 @@ mocks run.
 
 Chosen option: "Each upstream as a separate service, run in Docker", because only
 separate processes talking over the network simulate the distributed system the
-assignment is about.
+aggregator runs in.
 
 ```mermaid
 flowchart LR

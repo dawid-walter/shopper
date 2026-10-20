@@ -16,8 +16,8 @@ needs storage.
 
 ## Decision Drivers
 
-* Pricing stands in for an upstream service owned by another team; within this
-  assignment it is still a simulated upstream.
+* Pricing stands in for an upstream service owned by another team; in this system it
+  runs as a simulated upstream.
 
 ## Considered Options
 
@@ -27,7 +27,8 @@ needs storage.
 ## Decision Outcome
 
 Chosen option: "In-memory maps, seeded at startup", because Pricing is a simulated
-upstream, so durable storage adds setup without adding anything the assignment evaluates.
+upstream, so durable storage would add setup without adding behaviour the aggregator
+depends on.
 
 ### Consequences
 

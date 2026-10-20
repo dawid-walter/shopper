@@ -14,7 +14,7 @@ The monorepo (ADR 0006) needs a build tool that handles several service modules.
 
 ## Decision Drivers
 
-* The author prefers Gradle and is also fluent in Maven, so either can be defended.
+* The team prefers Gradle and is also fluent in Maven, so either is a safe choice.
 
 ## Considered Options
 
@@ -23,7 +23,7 @@ The monorepo (ADR 0006) needs a build tool that handles several service modules.
 
 ## Decision Outcome
 
-Chosen option: "Gradle", because it is the author's preferred tool, and fluency in
+Chosen option: "Gradle", because it is the team's preferred tool, and fluency in
 Maven means the choice is a preference rather than a gap.
 
 ### Consequences

@@ -15,8 +15,8 @@ We have to decide how their code is organised into repositories.
 
 ## Decision Drivers
 
-* This is a recruitment assignment, submitted as a single GitHub link and run locally
-  with minimal setup.
+* The system is small, delivered as one unit, and has to run locally with minimal
+  setup.
 
 ## Considered Options
 
@@ -25,8 +25,8 @@ We have to decide how their code is organised into repositories.
 
 ## Decision Outcome
 
-Chosen option: "One repository with a module per service", because the assignment is
-reviewed and run as one unit.
+Chosen option: "One repository with a module per service", because the system is
+reviewed, built and run as one unit.
 
 ```mermaid
 flowchart TB
@@ -50,11 +50,10 @@ flowchart TB
 ### Consequences
 
 * Good, because one clone and one command start the whole system.
-* Neutral, because the choice is driven by the assignment format, not by what a
-  production system of this kind would need.
+* Neutral, because the choice fits the current size of the system and should be
+  revisited as it grows.
 
 ## More Information
 
-Outside a recruitment assignment the choice depends on complexity: a modular monolith
-is the likely default, and for a very large system each service would get its own
-repository.
+As the system grows the choice depends on complexity: a modular monolith is the likely
+default, and for a very large system each service would get its own repository.

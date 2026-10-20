@@ -17,7 +17,7 @@ Pricing, Availability, Customer). We have to decide how the read path obtains it
 
 * The client wants the product now, with current price and stock.
 * The response time should stay reasonable even when upstreams are slow.
-* The assignment evaluates how partial upstream failures are handled.
+* A failing upstream must not break the whole response.
 
 ## Considered Options
 
@@ -66,5 +66,6 @@ sequenceDiagram
 ## More Information
 
 Full CQRS was rejected because price and stock change too often for a lagging
-projection, and because a broker with publishers and consumers does not fit the budget.
+projection, and because a broker with publishers and consumers is not justified by the
+current requirements.
 The slow-changing catalog is the exception, covered by ADR 0010.

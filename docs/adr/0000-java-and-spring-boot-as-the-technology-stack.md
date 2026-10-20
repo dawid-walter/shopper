@@ -10,12 +10,12 @@ informed:
 
 ## Context and Problem Statement
 
-The assignment allows Java 17+, Kotlin or Go. One stack has to be chosen for the
+The requirements allow Java 17+, Kotlin or Go. One stack has to be chosen for the
 aggregator and for every service that simulates an upstream.
 
 ## Decision Drivers
 
-* Every line of code has to be explained and defended in the technical interview.
+* The team has to be able to explain and maintain every part of the code.
 * The platform: object-oriented Java, a JVM with a JIT compiler and a garbage collector.
 * Spring offers extensive configuration options.
 

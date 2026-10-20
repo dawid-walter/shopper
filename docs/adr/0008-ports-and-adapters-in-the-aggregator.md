@@ -10,15 +10,14 @@ informed:
 
 ## Context and Problem Statement
 
-The aggregator is the core of the assignment: it receives requests over REST and calls
+The aggregator is the core of the system: it receives requests over REST and calls
 four upstreams. We have to decide how its code is structured internally. Upstream
 mocks and Pricing are outside the scope of this decision.
 
 ## Decision Drivers
 
-* The assignment requires that new data sources can be added without major refactoring.
-* gRPC is out of scope (ADR 0001), but it should be possible to show how it would be
-  added.
+* New data sources must be addable without major refactoring.
+* gRPC is out of scope (ADR 0001), but adding it later should not change the core.
 
 ## Considered Options
 

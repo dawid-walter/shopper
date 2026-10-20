@@ -10,14 +10,14 @@ informed:
 
 ## Context and Problem Statement
 
-The assignment requires the upstream mocks to behave realistically: artificial delays and
+The simulated upstreams have to behave realistically: artificial delays and
 occasional failures matching each service's typical latency and reliability. We have to
 decide where that behaviour is simulated.
 
 ## Decision Drivers
 
-* The simulation should show an understanding of distributed systems, which the
-  assignment says the mocks are judged on.
+* The simulation should reproduce how failures happen in a distributed system, so that
+  the aggregator's resilience is exercised against realistic faults.
 * Failure scenarios ("Pricing starts timing out") should be switchable live.
 
 ## Considered Options
@@ -63,4 +63,4 @@ flowchart LR
 ## More Information
 
 `tc netem` was rejected because packet loss shows up as TCP retransmissions rather than
-clear, demonstrable failures.
+clear, observable failures.

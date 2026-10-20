@@ -10,13 +10,14 @@ informed:
 
 ## Context and Problem Statement
 
-The assignment requires REST endpoints and treats a gRPC implementation as a bonus.
-We have to decide whether the aggregator also exposes a gRPC API.
+The requirements call for REST endpoints and list gRPC as optional. We have to decide
+whether the aggregator also exposes a gRPC API.
 
 ## Decision Drivers
 
-* The author has not worked with gRPC before.
-* The budget is 3–4 hours, and every part of the solution has to be defended in the interview.
+* The team has no experience with gRPC.
+* The first version has limited time, and everything in it has to be maintainable by
+  the team.
 
 ## Considered Options
 
@@ -26,9 +27,10 @@ We have to decide whether the aggregator also exposes a gRPC API.
 ## Decision Outcome
 
 Chosen option: "REST only", because REST meets the requirement, while gRPC would mean
-learning a new technology under time pressure, with no certainty of being able to
-defend it in the interview.
+learning a new technology under time pressure, without the experience to operate and
+maintain it.
 
 ### Consequences
 
-* Bad, because we give up the bonus points for gRPC.
+* Bad, because clients that would benefit from gRPC use REST until it is added.
+  ADR 0008 and ADR 0015 define where a gRPC adapter would plug in.
