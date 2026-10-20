@@ -82,7 +82,7 @@ One controller: `GET /prices/{id}?market&customerId&at` (`at` previews a future 
 
 ## Stage 4 · Aggregator core
 
-**Commits:** `test(aggregator): specify product view composition A1, A3–A10` (tests, red) → `feat(aggregator): implement the product view service with one shared fetch path` (green)
+**Commits:** `test(aggregator): specify product view composition A1, A3–A10` (tests, red) → `feat(aggregator): compose the product view with parallel calls within the request budget` (green)
 
 Domain records, ports in and out, and `ProductViewService`: Scatter-Gather over the four ports (ADR 0009) through one shared path (ADR 0017): every call runs in parallel (`inParallel`) and every wait is cut at the 500 ms budget (ADR 0016). Catalog is required (404 / 503); the other parts of `ProductView` are `Optional` and empty when their upstream fails. The status words clients see (`AVAILABLE`, `UNKNOWN`, `STANDARD`…) are chosen in the REST response, not in the domain. Optional ports return `Optional`: a 404 there is "no data", not a failure.
 
@@ -98,7 +98,7 @@ Domain records, ports in and out, and `ProductViewService`: Scatter-Gather over 
 
 ## Stage 5 · Aggregator adapters and REST API
 
-**Commits:** `test(aggregator): specify the aggregator over HTTP A1, A2, A5–A7, A10–A13` (tests, red) → `feat(aggregator): add REST adapters with timeouts and circuit breakers, and the product endpoint` (green)
+**Commits:** `test(aggregator): specify the aggregator over HTTP A1, A2, A5–A7, A10–A13` (tests, red) → `feat(aggregator): add REST adapters with timeouts, retry and circuit breakers, the product endpoint and observability` (green)
 
 `UpstreamClient`: one per upstream, with its own timeout (p99.9) and circuit breaker; every failure leaves as `UpstreamException` (TIMEOUT, CIRCUIT_OPEN) or its subclass `FastUpstreamFailure` (5xx, refused connection), so HTTP and Resilience4j never reach the core. Each adapter method has Spring's `@Retryable(includes = FastUpstreamFailure.class, maxRetries = 1, delay = 0)`: fast errors are retried once, timeouts never. Four small adapters translate upstream JSON into domain records, reading only the fields they need. `ProductController` + `ErrorHandler` + `ProductResponse`, which turns each empty part of the view into a section status (`UNAVAILABLE`, `UNKNOWN`, `STANDARD`). `AggregatorConfig` is the only place that knows both sides; values from ADR 0016 in `application.yml`. Observability (ADR 0018): `UpstreamClient` logs every failed call at `WARN`; the controller counts degraded sections; `TraceIdHeaderFilter` returns `X-Trace-Id`; the upstream executor carries the trace context to its virtual threads, so `traceparent` reaches every upstream.
 
