@@ -11,6 +11,7 @@
 | Each upstream is a separate service in Docker | [0002](#/adr/0002-upstreams-as-separate-services-in-docker.md) |
 | Pricing is a real archetype, the rest are mocks ([design](#/02-pricing.md)) | [0003](#/adr/0003-pricing-as-a-real-archetype-implementation-other-upstreams-as-mocks.md) |
 | Pricing keeps its state in memory | [0004](#/adr/0004-in-memory-storage-for-pricing.md) |
+| Java 25 + Spring Boot 4.1 | [0005](#/adr/0005-java-25-and-spring-boot-4-1.md) |
 
 ## 2. System map
 
@@ -173,10 +174,9 @@ Recommendation: **(b)** if we want Postgres in the aggregator, with a **per-sour
 
 1. **Postgres in the aggregator:** variant (a), (b) or (c) from §7a?
 2. **Customer segment for discounts:** from the contract in Pricing, or passed in by the aggregator? (details in [02](#/02-pricing.md))
-3. **Versions:** "the newest". Spring Boot **4.1.1** (latest GA; 4.2 is still a milestone), Resilience4j **2.4.0** (has a Spring Boot 4 module). Java: **25** (latest LTS) or **27** (latest release, non-LTS)?
-4. **Design question:** I recommend **B (flash sales)**.
-5. **Repository layout:** a monorepo with Gradle/Maven modules and a single `docker compose up`?
-6. **Language and market:** a language fallback (e.g. missing `pl` translation → `en`)? Currency derived from the market (`pl-PL` → PLN)?
-7. The message cut off at "główna fun…". What was meant to follow?
+3. **Design question:** I recommend **B (flash sales)**.
+4. **Repository layout:** a monorepo with Gradle/Maven modules and a single `docker compose up`?
+5. **Language and market:** a language fallback (e.g. missing `pl` translation → `en`)? Currency derived from the market (`pl-PL` → PLN)?
+6. The message cut off at "główna fun…". What was meant to follow?
 
-Resolved: ~~depth of DDD and archetypes in the mocks~~ → ADR 0003.
+Resolved: ~~depth of DDD and archetypes in the mocks~~ → ADR 0003 · ~~versions~~ → ADR 0005.
