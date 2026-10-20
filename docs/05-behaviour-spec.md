@@ -34,7 +34,10 @@ Markets: `pl-PL` (PLN, VAT 23%), `de-DE` (EUR, VAT 19%), `nl-NL` (EUR, VAT 21%).
 | A12 | — | `market=xx-XX` | `400` | component |
 | A13 | pricing keeps failing | several requests | after the circuit opens pricing is **no longer called**; responses stay `200` with price `UNAVAILABLE` | component (if time) |
 
-## Pricing: `GET /prices/{productId}?market=…&customerId=…`
+## Pricing
+
+- `GET /prices/{productId}?market=…&customerId=…&at=…`: `at` (optional, default now) prices at a given moment, e.g. a future VAT change.
+- `POST /components/{componentId}/versions`: adds a version (calculator, validity, applicability) with `expectedVersion` for optimistic locking.
 
 Single example tests on the domain (pure, no Spring), plus one over HTTP.
 
@@ -45,6 +48,8 @@ Single example tests on the domain (pure, no Spring), plus one over HTTP.
 | P3 | contract `C-42` = −10% | price for `pl-PL`, `C-42` | discount −10.00 before VAT; gross 110.70 |
 | P4 | flash-sale version −20% valid 10:00–12:00 | price at 11:00 / at 12:00 | applied at 11:00; not applied at 12:00 (time from an injected clock) |
 | P5 | `P-9999`, or a market without a price list | price | "not priced" → `404` |
+| P6 | VAT PL 23%; a new version **24% valid from 2027-01-01** is added via `POST /components/vat-pl/versions` | price for `pl-PL` with `at=2026-12-31` / `at=2027-01-02` | 23% before, 24% after; the old version is untouched |
+| P7 | two writers add a version to `vat-pl`, both expecting version 3 | second write | `409 Conflict`; the retry on the new version succeeds |
 
 ## Not tested in automated tests
 
