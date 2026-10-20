@@ -25,9 +25,10 @@ We plan **from the general to the specific**. A level is closed only once its de
 
 | Topic | State |
 |---|---|
-| Bounded contexts and the context map (who is upstream, who conforms, where the anti-corruption layers go) | ⬜ |
-| Aggregator model: product view, sections, required/optional source policy, market/locale | ⬜ |
+| Context map: upstreams behind ACLs, Pricing as OHS, upstreams independent | ✅ ADR 0011 |
+| Aggregator as an integration context, no DDD aggregates | ✅ ADR 0012 |
 | Pricing model: valuation archetype | 🟡 draft in [02 · Pricing](#/02-pricing.md) |
+| `PriceComponent` as the aggregate in Pricing | ✅ ADR 0013 |
 | Who owns the customer discount and segment | ⬜ open: [01 §8](#/01-big-picture.md) |
 | Upstream contracts (what each mock returns) | ⬜ |
 
