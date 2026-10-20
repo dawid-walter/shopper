@@ -2,15 +2,16 @@
 
 We plan **from the general to the specific**. A level is closed only once its decisions are agreed (an ADR or an entry in [01 · Big picture](#/01-big-picture.md)); only then do we move to the next one.
 
-## Level 1 · Architecture: services and their boundaries
+## Level 1 · Architecture: services and their boundaries ✅ closed
 
 | Topic | State |
 |---|---|
 | Stack: Java 25 + Spring Boot 4.1, REST only | ✅ ADR 0000, 0001, 0005 |
 | Aggregator + 4 upstreams as separate services in Docker | ✅ ADR 0002 |
 | Pricing as a real archetype, other upstreams as mocks | ✅ ADR 0003 |
-| Repository layout (monorepo, modules, one `docker compose up`) | ⬜ open |
-| Internal architecture of the aggregator (e.g. ports and adapters) | ⬜ open |
+| Monorepo with a module per service | ✅ ADR 0006 |
+| Gradle | ✅ ADR 0007 |
+| Ports and adapters in the aggregator | ✅ ADR 0008 |
 
 ## Level 2 · Communication
 

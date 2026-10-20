@@ -12,6 +12,9 @@
 | Pricing is a real archetype, the rest are mocks ([design](#/02-pricing.md)) | [0003](#/adr/0003-pricing-as-a-real-archetype-implementation-other-upstreams-as-mocks.md) |
 | Pricing keeps its state in memory | [0004](#/adr/0004-in-memory-storage-for-pricing.md) |
 | Java 25 + Spring Boot 4.1 | [0005](#/adr/0005-java-25-and-spring-boot-4-1.md) |
+| Monorepo with a module per service | [0006](#/adr/0006-monorepo-for-all-services.md) |
+| Gradle | [0007](#/adr/0007-gradle-as-the-build-tool.md) |
+| Ports and adapters in the aggregator | [0008](#/adr/0008-ports-and-adapters-in-the-aggregator.md) |
 
 ## 2. System map
 
@@ -202,8 +205,7 @@ Recommendation: **(d) instead of (b)**, not both. It shows CQRS where it fits (s
 
 1. **Postgres in the aggregator:** variant (a), (b), (c) or (d) from §7a?
 2. **Customer segment for discounts:** from the contract in Pricing, or passed in by the aggregator? (details in [02](#/02-pricing.md))
-3. **Repository layout:** a monorepo with Gradle/Maven modules and a single `docker compose up`?
-4. **Language and market:** a language fallback (e.g. missing `pl` translation → `en`)? Currency derived from the market (`pl-PL` → PLN)?
-5. The message cut off at "główna fun…". What was meant to follow?
+3. **Language and market:** a language fallback (e.g. missing `pl` translation → `en`)? Currency derived from the market (`pl-PL` → PLN)?
+4. The message cut off at "główna fun…". What was meant to follow?
 
-Resolved: ~~depth of DDD and archetypes in the mocks~~ → ADR 0003 · ~~versions~~ → ADR 0005.
+Resolved: ~~depth of DDD and archetypes in the mocks~~ → ADR 0003 · ~~versions~~ → ADR 0005 · ~~repository layout~~ → ADR 0006, 0007.
