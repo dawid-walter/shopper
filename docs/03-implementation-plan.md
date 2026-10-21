@@ -46,7 +46,7 @@ flowchart LR
 | README: how to run, decisions and trade-offs, "with more time", the design question | after stage 6 |
 | Toxiproxy with the assignment's latency and failure figures, always on (ADR 0014) | ✅ done |
 | Prometheus, Loki and Grafana with one dashboard, `docker compose --profile observability up` (ADR 0018) | ✅ done |
-| Chaos-testing skill in `.claude/skills/` | last |
+| Chaos-testing skill in `.ai/skills/chaos-test` | ✅ done |
 
 Before showing the demo, send a few warm-up requests: the first calls after a cold start can exceed the steady-state timeouts (ADR 0018).
 
