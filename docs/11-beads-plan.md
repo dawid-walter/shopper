@@ -1,6 +1,6 @@
 # 11 · Beads plan
 
-> Status: **proposal, not created yet**. Shape of the tracker items for implementing the [code plan](#/08-code-plan.md). Nothing exists in beads until this is accepted.
+> Status: **created in beads** (2026-10-21). Epic `shop-d5k`; items below. The backlog is local to this machine (`.beads/` is excluded from git).
 
 ## Parent (epic)
 
@@ -42,15 +42,15 @@ flowchart LR
 
 Arrows point from a prerequisite to the item it unblocks. Items 2, 3 and 5 can run in parallel, then 4 and 6, then 7.
 
-| # | Title | Depends on | Done when |
-|---|---|---|---|
-| 1 | `Stage 0: Gradle skeleton for five services` | — | Gradle 9.8.2 wrapper; `./gradlew test`: 5 green |
-| 2 | `Stage 1: catalog, availability and customer mocks` | 1 | 🔴 → 🟢; mock tests: 7 green |
-| 3 | `Stage 2: pricing core (valuation archetype)` | 1 | 🔴 → 🟢; `PricingServiceTest`: 3 green |
-| 4 | `Stage 3: pricing REST API` | 3 | 🔴 → 🟢; `PricingApiTest`: 2 green |
-| 5 | `Stage 4: aggregator core` | 1 | 🔴 → 🟢; `ProductViewServiceTest`: 9 green |
-| 6 | `Stage 5: aggregator adapters, REST API and observability` | 5 | 🔴 → 🟢; `ProductEndpointComponentTest`: 14 green |
-| 7 | `Stage 6: docker compose and Swagger UI` | 2, 4, 6 | `docker compose up --build` and the checks on page 08 (200, 404, 400, Pricing and Catalog stopped, Swagger on 8080 and 8082); `./gradlew test`: 40 green |
+| # | Bead | Title | Depends on | Done when |
+|---|---|---|---|---|
+| 1 | `shop-9dd` | `Stage 0: Gradle skeleton for five services` | — | Gradle 9.8.2 wrapper; `./gradlew test`: 5 green |
+| 2 | `shop-ie3` | `Stage 1: catalog, availability and customer mocks` | 1 | 🔴 → 🟢; mock tests: 7 green |
+| 3 | `shop-y11` | `Stage 2: pricing core (valuation archetype)` | 1 | 🔴 → 🟢; `PricingServiceTest`: 3 green |
+| 4 | `shop-h1m` | `Stage 3: pricing REST API` | 3 | 🔴 → 🟢; `PricingApiTest`: 2 green |
+| 5 | `shop-gh2` | `Stage 4: aggregator core` | 1 | 🔴 → 🟢; `ProductViewServiceTest`: 9 green |
+| 6 | `shop-ix3` | `Stage 5: aggregator adapters, REST API and observability` | 5 | 🔴 → 🟢; `ProductEndpointComponentTest`: 14 green |
+| 7 | `shop-pn5` | `Stage 6: docker compose and Swagger UI` | 2, 4, 6 | `docker compose up --build` and the checks on page 08 (200, 404, 400, Pricing and Catalog stopped, Swagger on 8080 and 8082); `./gradlew test`: 40 green |
 
 **Would it still work if we stopped after any item?** Yes: every item ends with a 🟢 commit and a green build. The only broken state, the 🔴 commit, always sits inside one item.
 
