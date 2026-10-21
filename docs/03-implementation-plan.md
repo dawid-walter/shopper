@@ -1,6 +1,6 @@
 # 03 · Implementation plan
 
-> Status: **for review**. The code of every stage is on [08 · Code plan](#/08-code-plan.md) and readable in [09 · Code browser](#/09-code-browser.html). It was built and run before being published: 40 tests green, the stack checked end to end in Docker.
+> Status: **implemented**. All seven stages are on `main`, one or two commits each, as listed below; 40 tests green and the stack checked end to end in Docker. Details per stage: [08 · Code plan](08-code-plan.md).
 
 ## Stages and commits
 
@@ -46,13 +46,13 @@ flowchart LR
 | README: how to run, decisions and trade-offs, "with more time", the design question | after stage 6 |
 | Toxiproxy with the assignment's latency and failure figures (ADR 0014) | demo |
 | Prometheus, Loki, Tempo and Grafana: dashboard per upstream, degraded sections, traces | demo and review |
-| Compare measured values with the predictions on [07](#/07-resilience-math.md): ~99.6% complete, nothing slower than 500 ms, no spurious circuit-breaker trips; a short load loop (`hey` or k6) feeds the numbers | demo |
+| Compare measured values with the predictions on [07](07-resilience-math.md): ~99.6% complete, nothing slower than 500 ms, no spurious circuit-breaker trips; a short load loop (`hey` or k6) feeds the numbers | demo |
 | Chaos-testing skill in `.claude/skills/` | last |
 
 Before showing the demo, send a few warm-up requests: the first calls after a cold start can exceed the steady-state timeouts (ADR 0018).
 
 ## How it gets built
 
-1. Review the code in [09 · Code browser](#/09-code-browser.html) and discuss changes.
+1. Review the code plan and discuss changes.
 2. After acceptance, the stages are cut into tasks in **beads**, with the dependencies above, and shown for confirmation before they are created.
 3. **Workers** in tmux panels take the tasks. The coordinator verifies every report (build, tests, and the code against the accepted plan) before closing a task.

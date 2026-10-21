@@ -1,6 +1,6 @@
 # 06 · Packages and flow
 
-> Status: **agreed**. Layers: `domain` · `application` · `infrastructure` (outbound adapters, config) · `presentation` (inbound adapters). Main classes only; tests mirror the [behaviour spec](#/05-behaviour-spec.md). Each service has its own `Market` and `Money`: no shared kernel between services. Packages for future transports (`grpc`, `kafka`, `listener`, `integrationevent`) are not created until needed.
+> Status: **agreed**. Layers: `domain` · `application` · `infrastructure` (outbound adapters, config) · `presentation` (inbound adapters). Main classes only; tests mirror the [behaviour spec](05-behaviour-spec.md). Each service has its own `Market` and `Money`: no shared kernel between services. Packages for future transports (`grpc`, `kafka`, `listener`, `integrationevent`) are not created until needed.
 
 ## Aggregator
 

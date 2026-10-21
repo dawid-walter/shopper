@@ -1,6 +1,6 @@
 # 07 · Resilience parameters from the numbers
 
-> Status: **proposal**. Timeouts, retries, time budget and circuit breaker are derived from the upstreams' typical latency and reliability instead of being guessed. Decision: [ADR 0016](#/adr/0016-resilience-parameters-derived-from-upstream-latency-and-reliability.md).
+> Status: **proposal**. Timeouts, retries, time budget and circuit breaker are derived from the upstreams' typical latency and reliability instead of being guessed. Decision: [ADR 0016](adr/0016-resilience-parameters-derived-from-upstream-latency-and-reliability.md).
 
 **Percentiles:** p50 is the typical (median) latency, half of the responses are faster; p99 means 1 in 100 responses is slower; p99.9 means 1 in 1000 is slower. They show the slow tail that an average hides.
 

@@ -1,7 +1,5 @@
 # 08 · Code plan
 
-> **Read the code in [09 · Code browser](#/09-code-browser.html)**: tabs per module, files grouped by layer, filter by stage.
-
 > Status: **for review**. Every class and test that will be written, split into stages. Each stage is two commits: the tests first (red), then the implementation (green). Stages 0 and 6 are one commit each.
 >
 > The code below was **built and run before being published here**: Gradle build green, 40 tests passing, and the system checked end to end in Docker. What you read is what goes into the repository.

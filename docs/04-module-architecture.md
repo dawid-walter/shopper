@@ -49,7 +49,7 @@ flowchart LR
   class GRPC,MSG future
 ```
 
-Package structure: [06 · Packages and flow](#/06-packages-and-flow.md).
+Package structure: [06 · Packages and flow](06-packages-and-flow.md).
 
 ## Pricing
 
@@ -93,7 +93,7 @@ flowchart LR
   class GRPC,KAFKA,PUB future
 ```
 
-Package structure: [06 · Packages and flow](#/06-packages-and-flow.md).
+Package structure: [06 · Packages and flow](06-packages-and-flow.md).
 
 ## Future broker: who talks to whom
 

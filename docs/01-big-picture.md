@@ -1,25 +1,25 @@
 # 01 · Big picture: first planning pass
 
-> Status: **draft for discussion**. Settled points go into the [ADRs](#/adr/0000-java-and-spring-boot-as-the-technology-stack.md); open ones are at the bottom of the page.
+> Status: **draft for discussion**. Settled points go into the [ADRs](adr/0000-java-and-spring-boot-as-the-technology-stack.md); open ones are at the bottom of the page.
 
 ## 1. Settled
 
 | Decision | ADR |
 |---|---|
-| Java + Spring Boot | [0000](#/adr/0000-java-and-spring-boot-as-the-technology-stack.md) |
-| REST only, no gRPC | [0001](#/adr/0001-rest-only-no-grpc.md) |
-| Each upstream is a separate service in Docker | [0002](#/adr/0002-upstreams-as-separate-services-in-docker.md) |
-| Pricing is a real archetype, the rest are mocks ([design](#/02-pricing.md)) | [0003](#/adr/0003-pricing-as-a-real-archetype-implementation-other-upstreams-as-mocks.md) |
-| Pricing keeps its state in memory | [0004](#/adr/0004-in-memory-storage-for-pricing.md) |
-| Java 25 + Spring Boot 4.1 | [0005](#/adr/0005-java-25-and-spring-boot-4-1.md) |
-| Monorepo with a module per service | [0006](#/adr/0006-monorepo-for-all-services.md) |
-| Gradle | [0007](#/adr/0007-gradle-as-the-build-tool.md) |
-| Ports and adapters in the aggregator | [0008](#/adr/0008-ports-and-adapters-in-the-aggregator.md) |
-| Synchronous REST with parallel fan-out on the read path | [0009](#/adr/0009-synchronous-rest-with-parallel-fan-out-on-the-read-path.md) |
-| ~~Catalog projection fed by a change feed~~ (rejected: no events yet) | [0010](#/adr/0010-catalog-projection-in-the-aggregator-fed-by-a-change-feed.md) |
-| Context map: ACLs in the aggregator, Pricing as OHS | [0011](#/adr/0011-context-map-upstreams-behind-anti-corruption-layers-pricing-as-open-host-service.md) |
-| Aggregator as an integration context, no DDD aggregates | [0012](#/adr/0012-aggregator-as-an-integration-context-without-ddd-aggregates.md) |
-| `PriceComponent` as the aggregate in Pricing | [0013](#/adr/0013-pricecomponent-as-the-aggregate-in-pricing.md) |
+| Java + Spring Boot | [0000](adr/0000-java-and-spring-boot-as-the-technology-stack.md) |
+| REST only, no gRPC | [0001](adr/0001-rest-only-no-grpc.md) |
+| Each upstream is a separate service in Docker | [0002](adr/0002-upstreams-as-separate-services-in-docker.md) |
+| Pricing is a real archetype, the rest are mocks ([design](02-pricing.md)) | [0003](adr/0003-pricing-as-a-real-archetype-implementation-other-upstreams-as-mocks.md) |
+| Pricing keeps its state in memory | [0004](adr/0004-in-memory-storage-for-pricing.md) |
+| Java 25 + Spring Boot 4.1 | [0005](adr/0005-java-25-and-spring-boot-4-1.md) |
+| Monorepo with a module per service | [0006](adr/0006-monorepo-for-all-services.md) |
+| Gradle | [0007](adr/0007-gradle-as-the-build-tool.md) |
+| Ports and adapters in the aggregator | [0008](adr/0008-ports-and-adapters-in-the-aggregator.md) |
+| Synchronous REST with parallel fan-out on the read path | [0009](adr/0009-synchronous-rest-with-parallel-fan-out-on-the-read-path.md) |
+| ~~Catalog projection fed by a change feed~~ (rejected: no events yet) | [0010](adr/0010-catalog-projection-in-the-aggregator-fed-by-a-change-feed.md) |
+| Context map: ACLs in the aggregator, Pricing as OHS | [0011](adr/0011-context-map-upstreams-behind-anti-corruption-layers-pricing-as-open-host-service.md) |
+| Aggregator as an integration context, no DDD aggregates | [0012](adr/0012-aggregator-as-an-integration-context-without-ddd-aggregates.md) |
+| `PriceComponent` as the aggregate in Pricing | [0013](adr/0013-pricecomponent-as-the-aggregate-in-pricing.md) |
 
 ## 2. System map
 
@@ -152,7 +152,7 @@ The customer **always sees the product**, with the price marked as unavailable. 
 ## 7. Scope (settled)
 
 - **Aggregator**: a proper architecture (ports and adapters), required/optional policies, resilience, tests.
-- **Pricing**: a real implementation of the archetype, described in [02 · Pricing](#/02-pricing.md).
+- **Pricing**: a real implementation of the archetype, described in [02 · Pricing](02-pricing.md).
 - **Catalog, Availability, Customer**: mocks with a fake API and the realistic network behaviour from §6.
 - Pricing gets the same latency and failure simulation as the mocks.
 
@@ -163,7 +163,7 @@ The customer **always sees the product**, with the price marked as unavailable. 
 | Component | State | Where |
 |---|---|---|
 | Aggregator | projections in **Postgres** (proposal, variant to choose below) | Postgres |
-| Pricing | components, versions, price lists, contracts | in memory ([ADR 0004](#/adr/0004-in-memory-storage-for-pricing.md)) |
+| Pricing | components, versions, price lists, contracts | in memory ([ADR 0004](adr/0004-in-memory-storage-for-pricing.md)) |
 | Mocks | test data | in memory |
 
 **Postgres in the aggregator: what kind of projection?** The term covers two very different designs:
@@ -210,7 +210,7 @@ Recommendation: **(d) instead of (b)**, not both. It shows CQRS where it fits (s
 
 ## 8. Open questions
 
-1. **Customer segment for discounts:** from the contract in Pricing, or passed in by the aggregator? (details in [02](#/02-pricing.md))
+1. **Customer segment for discounts:** from the contract in Pricing, or passed in by the aggregator? (details in [02](02-pricing.md))
 2. **Language and market:** a language fallback (e.g. missing `pl` translation → `en`)? Currency derived from the market (`pl-PL` → PLN)?
 3. The message cut off at "główna fun…". What was meant to follow?
 

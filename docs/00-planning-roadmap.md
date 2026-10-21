@@ -1,6 +1,6 @@
 # Planning roadmap
 
-We plan **from the general to the specific**. A level is closed only once its decisions are agreed (an ADR or an entry in [01 · Big picture](#/01-big-picture.md)); only then do we move to the next one.
+We plan **from the general to the specific**. A level is closed only once its decisions are agreed (an ADR or an entry in [01 · Big picture](01-big-picture.md)); only then do we move to the next one.
 
 ## Level 1 · Architecture: services and their boundaries ✅ closed
 
@@ -12,7 +12,7 @@ We plan **from the general to the specific**. A level is closed only once its de
 | Monorepo with a module per service | ✅ ADR 0006 |
 | Gradle | ✅ ADR 0007 |
 | Ports and adapters in the aggregator | ✅ ADR 0008 |
-| Ports and adapters in Pricing; gRPC and broker as future adapters ([04](#/04-module-architecture.md)) | ✅ ADR 0015 |
+| Ports and adapters in Pricing; gRPC and broker as future adapters ([04](04-module-architecture.md)) | ✅ ADR 0015 |
 
 ## Level 2 · Communication ✅ closed
 
@@ -28,16 +28,16 @@ We plan **from the general to the specific**. A level is closed only once its de
 |---|---|
 | Context map: upstreams behind ACLs, Pricing as OHS, upstreams independent | ✅ ADR 0011 |
 | Aggregator as an integration context, no DDD aggregates | ✅ ADR 0012 |
-| Pricing model: valuation archetype | 🟡 draft in [02 · Pricing](#/02-pricing.md) |
+| Pricing model: valuation archetype | 🟡 draft in [02 · Pricing](02-pricing.md) |
 | `PriceComponent` as the aggregate in Pricing | ✅ ADR 0013 |
-| Who owns the customer discount and segment | ⬜ open: [01 §8](#/01-big-picture.md) |
+| Who owns the customer discount and segment | ⬜ open: [01 §8](01-big-picture.md) |
 | Upstream contracts (what each mock returns) | ⬜ |
 
 ## Level 4 · Details
 
 | Topic | State |
 |---|---|
-| Resilience parameters from latency and reliability ([07](#/07-resilience-math.md)) | ✅ ADR 0016 |
+| Resilience parameters from latency and reliability ([07](07-resilience-math.md)) | ✅ ADR 0016 |
 | Typed ports with one shared fetch path; adding a source | ✅ ADR 0017 |
 | Contract tests | ❌ not now |
 | Observability: JSON logs, metrics, health, trace id | ✅ ADR 0018 |

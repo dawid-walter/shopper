@@ -7,12 +7,7 @@
 **Implement the shopper services from the accepted code plan**
 
 Holds everything the items share, so each item only links to it:
-- **Source of truth:** the code of every class and test in `hub/code-plan/files/<module>/…`, the stages in `hub/pages/08-code-plan.md`.
-- **Path mapping from the hub to the repo:**
-  - `aggregator/application/…` → `product-aggregator/src/main/java/com/shopper/aggregator/application/…` (same for the other modules);
-  - `test/…` → `src/test/java/…`;
-  - `resources/…` → `src/main/resources/…`;
-  - files marked "(stage 0)" are intermediate versions, replaced later.
+- **Source of truth:** the accepted code plan, one file per class and test, and the stages in [08 · Code plan](08-code-plan.md). The plan's files were kept outside the repository; the result of each stage is its pair of commits.
 - **Commit rules:** two commits per stage, 🔴 tests only (do not compile yet, on purpose), then 🟢 implementation; messages in English exactly as in the plan; no `Co-Authored-By` trailer; no comments in code.
 - **Environment:** Java 25 from SDKMAN (`source ~/.sdkman/bin/sdkman-init.sh`); Docker through `sg docker -c …`.
 

@@ -1,6 +1,6 @@
 # Assignment: Product Information Aggregator (Kramp)
 
-Source: [kramp-backend-assignment.pdf](#/kramp-backend-assignment.pdf) (local only, not in the repository)
+Source: the assignment PDF (kept outside the repository).
 
 A B2B platform for agricultural and machinery parts, serving 20+ markets and languages across Europe. Today the frontend makes several separate calls to render one product view, which leads to slow pages, inconsistent behaviour when a service fails, and logic duplicated across clients.
 

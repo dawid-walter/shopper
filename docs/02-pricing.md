@@ -1,6 +1,6 @@
 # 02 · Pricing: the valuation archetype
 
-> Status: **draft for discussion**. Decision: [ADR 0003](#/adr/0003-pricing-as-a-real-archetype-implementation-other-upstreams-as-mocks.md).
+> Status: **draft for discussion**. Decision: [ADR 0003](adr/0003-pricing-as-a-real-archetype-implementation-other-upstreams-as-mocks.md).
 
 ## Why an archetype, not a `price` column
 
@@ -70,7 +70,7 @@ To decide: do we also keep the segment (`DEALER`/`WORKSHOP`) in Pricing, as part
 
 ## Persistence
 
-Decided: **in-memory maps, seeded at startup** ([ADR 0004](#/adr/0004-in-memory-storage-for-pricing.md)). Pricing is a simulated upstream, so a database would add setup without adding anything the assignment evaluates. Versions added at runtime (a live flash sale) are lost on restart, which is acceptable here.
+Decided: **in-memory maps, seeded at startup** ([ADR 0004](adr/0004-in-memory-storage-for-pricing.md)). Pricing is a simulated upstream, so a database would add setup without adding anything the assignment evaluates. Versions added at runtime (a live flash sale) are lost on restart, which is acceptable here.
 
 ## Scope for 3–4 h: build it evolutionarily
 
