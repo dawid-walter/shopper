@@ -1,4 +1,4 @@
-package com.shopper.aggregator.application.port.out;
+package com.shopper.aggregator.application.port.out.exception;
 
 public class UpstreamException extends RuntimeException {
 

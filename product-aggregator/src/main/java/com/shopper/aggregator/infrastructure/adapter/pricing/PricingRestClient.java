@@ -6,11 +6,11 @@ import java.util.Optional;
 import org.springframework.resilience.annotation.Retryable;
 
 import com.shopper.aggregator.application.port.out.PricingPort;
-import com.shopper.aggregator.application.port.out.FastUpstreamFailure;
+import com.shopper.aggregator.application.port.out.model.Price;
 import com.shopper.aggregator.domain.CustomerId;
 import com.shopper.aggregator.domain.Market;
-import com.shopper.aggregator.domain.Price;
 import com.shopper.aggregator.domain.ProductId;
+import com.shopper.aggregator.infrastructure.adapter.FastUpstreamFailure;
 import com.shopper.aggregator.infrastructure.adapter.UpstreamClient;
 
 public class PricingRestClient implements PricingPort {

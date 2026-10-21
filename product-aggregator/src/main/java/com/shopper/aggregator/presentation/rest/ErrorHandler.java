@@ -7,10 +7,10 @@ import org.springframework.http.ProblemDetail;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import com.shopper.aggregator.domain.CatalogUnavailableException;
-import com.shopper.aggregator.domain.InvalidIdentifierException;
-import com.shopper.aggregator.domain.ProductNotFoundException;
-import com.shopper.aggregator.domain.UnsupportedMarketException;
+import com.shopper.aggregator.application.port.in.exception.CatalogUnavailableException;
+import com.shopper.aggregator.application.port.in.exception.ProductNotFoundException;
+import com.shopper.aggregator.domain.exception.InvalidIdentifierException;
+import com.shopper.aggregator.domain.exception.UnsupportedMarketException;
 
 @RestControllerAdvice
 class ErrorHandler {

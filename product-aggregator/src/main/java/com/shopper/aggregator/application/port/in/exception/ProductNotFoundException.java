@@ -1,4 +1,6 @@
-package com.shopper.aggregator.domain;
+package com.shopper.aggregator.application.port.in.exception;
+
+import com.shopper.aggregator.domain.ProductId;
 
 public class ProductNotFoundException extends RuntimeException {
 

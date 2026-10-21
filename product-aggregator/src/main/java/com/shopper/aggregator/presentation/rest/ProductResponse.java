@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.shopper.aggregator.domain.ProductView;
+import com.shopper.aggregator.application.port.in.model.ProductView;
 
 record ProductResponse(String productId, String market, Product product, PriceView price, StockView stock,
                        CustomerView customer) {

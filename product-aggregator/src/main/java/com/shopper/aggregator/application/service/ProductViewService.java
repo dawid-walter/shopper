@@ -14,18 +14,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.shopper.aggregator.application.port.in.GetProductView;
+import com.shopper.aggregator.application.port.in.exception.CatalogUnavailableException;
+import com.shopper.aggregator.application.port.in.exception.ProductNotFoundException;
+import com.shopper.aggregator.application.port.in.model.ProductView;
 import com.shopper.aggregator.application.port.out.AvailabilityPort;
 import com.shopper.aggregator.application.port.out.CatalogPort;
 import com.shopper.aggregator.application.port.out.CustomerPort;
 import com.shopper.aggregator.application.port.out.PricingPort;
-import com.shopper.aggregator.application.port.out.UpstreamException;
-import com.shopper.aggregator.domain.CatalogUnavailableException;
+import com.shopper.aggregator.application.port.out.exception.UpstreamException;
+import com.shopper.aggregator.application.port.out.model.ProductDetails;
 import com.shopper.aggregator.domain.CustomerId;
 import com.shopper.aggregator.domain.Market;
-import com.shopper.aggregator.domain.ProductDetails;
 import com.shopper.aggregator.domain.ProductId;
-import com.shopper.aggregator.domain.ProductNotFoundException;
-import com.shopper.aggregator.domain.ProductView;
 
 public class ProductViewService implements GetProductView {
 

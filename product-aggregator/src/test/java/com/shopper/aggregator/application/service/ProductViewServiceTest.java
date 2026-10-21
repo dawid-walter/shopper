@@ -18,22 +18,22 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 
+import com.shopper.aggregator.application.port.in.exception.CatalogUnavailableException;
+import com.shopper.aggregator.application.port.in.exception.ProductNotFoundException;
+import com.shopper.aggregator.application.port.in.model.ProductView;
 import com.shopper.aggregator.application.port.out.AvailabilityPort;
 import com.shopper.aggregator.application.port.out.CatalogPort;
 import com.shopper.aggregator.application.port.out.CustomerPort;
 import com.shopper.aggregator.application.port.out.PricingPort;
-import com.shopper.aggregator.application.port.out.UpstreamException;
-import com.shopper.aggregator.application.port.out.UpstreamException.Failure;
-import com.shopper.aggregator.domain.CatalogUnavailableException;
+import com.shopper.aggregator.application.port.out.exception.UpstreamException;
+import com.shopper.aggregator.application.port.out.exception.UpstreamException.Failure;
+import com.shopper.aggregator.application.port.out.model.CustomerProfile;
+import com.shopper.aggregator.application.port.out.model.Price;
+import com.shopper.aggregator.application.port.out.model.ProductDetails;
+import com.shopper.aggregator.application.port.out.model.Stock;
 import com.shopper.aggregator.domain.CustomerId;
-import com.shopper.aggregator.domain.CustomerProfile;
 import com.shopper.aggregator.domain.Market;
-import com.shopper.aggregator.domain.Price;
-import com.shopper.aggregator.domain.ProductDetails;
 import com.shopper.aggregator.domain.ProductId;
-import com.shopper.aggregator.domain.ProductNotFoundException;
-import com.shopper.aggregator.domain.ProductView;
-import com.shopper.aggregator.domain.Stock;
 
 class ProductViewServiceTest {
 

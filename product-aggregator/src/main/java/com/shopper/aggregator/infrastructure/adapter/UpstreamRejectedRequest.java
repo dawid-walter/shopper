@@ -1,4 +1,6 @@
-package com.shopper.aggregator.application.port.out;
+package com.shopper.aggregator.infrastructure.adapter;
+
+import com.shopper.aggregator.application.port.out.exception.UpstreamException;
 
 public class UpstreamRejectedRequest extends UpstreamException {
 

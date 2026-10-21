@@ -1,4 +1,4 @@
-package com.shopper.aggregator.domain;
+package com.shopper.aggregator.domain.exception;
 
 public class InvalidIdentifierException extends RuntimeException {
 

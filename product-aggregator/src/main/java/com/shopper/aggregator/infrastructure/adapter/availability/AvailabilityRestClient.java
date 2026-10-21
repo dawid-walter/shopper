@@ -5,10 +5,10 @@ import java.util.Optional;
 import org.springframework.resilience.annotation.Retryable;
 
 import com.shopper.aggregator.application.port.out.AvailabilityPort;
-import com.shopper.aggregator.application.port.out.FastUpstreamFailure;
+import com.shopper.aggregator.application.port.out.model.Stock;
 import com.shopper.aggregator.domain.Market;
 import com.shopper.aggregator.domain.ProductId;
-import com.shopper.aggregator.domain.Stock;
+import com.shopper.aggregator.infrastructure.adapter.FastUpstreamFailure;
 import com.shopper.aggregator.infrastructure.adapter.UpstreamClient;
 
 public class AvailabilityRestClient implements AvailabilityPort {

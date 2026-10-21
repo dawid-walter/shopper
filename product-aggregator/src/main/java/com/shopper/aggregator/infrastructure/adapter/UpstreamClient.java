@@ -11,14 +11,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.client.JdkClientHttpRequestFactory;
 import org.springframework.web.client.ResourceAccessException;
-import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.util.UriBuilder;
 
-import com.shopper.aggregator.application.port.out.FastUpstreamFailure;
-import com.shopper.aggregator.application.port.out.UpstreamException;
-import com.shopper.aggregator.application.port.out.UpstreamException.Failure;
-import com.shopper.aggregator.application.port.out.UpstreamRejectedRequest;
+import com.shopper.aggregator.application.port.out.exception.UpstreamException;
+import com.shopper.aggregator.application.port.out.exception.UpstreamException.Failure;
 import com.shopper.aggregator.infrastructure.config.AggregatorProperties.Upstream;
 
 import io.github.resilience4j.circuitbreaker.CallNotPermittedException;

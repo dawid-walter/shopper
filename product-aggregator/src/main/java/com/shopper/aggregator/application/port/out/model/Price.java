@@ -1,4 +1,4 @@
-package com.shopper.aggregator.domain;
+package com.shopper.aggregator.application.port.out.model;
 
 import java.math.BigDecimal;
 
