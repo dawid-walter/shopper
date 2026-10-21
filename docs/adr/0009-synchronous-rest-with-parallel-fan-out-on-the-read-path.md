@@ -68,7 +68,15 @@ sequenceDiagram
 The read path follows the **Scatter-Gather** pattern from Enterprise Integration Patterns
 (Hohpe & Woolf) in a simplified, in-process form: a fixed list of recipients is called in
 parallel, and the replies are combined once all have arrived or the request budget
-(ADR 0016) runs out. A full Scatter-Gather, with a Recipient List, an Aggregator that
+(ADR 0016) runs out.
+
+* Variant: Recipient List, a fixed set of four upstreams, so the number of replies is
+  known.
+* Completion: wait for all, time out at the request budget, with Catalog as an
+  override that fails the request at once.
+* Late replies are discarded; the calls end at their own HTTP timeouts.
+
+A full Scatter-Gather, with a Recipient List, an Aggregator that
 correlates replies and an explicit completion strategy, built for example with Spring
 Integration or Apache Camel, becomes worth it when recipients are reached over messaging
 or change at run time.
