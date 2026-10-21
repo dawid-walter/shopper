@@ -14,6 +14,7 @@ import com.shopper.aggregator.application.port.out.AvailabilityPort;
 import com.shopper.aggregator.application.port.out.CatalogPort;
 import com.shopper.aggregator.application.port.out.CustomerPort;
 import com.shopper.aggregator.application.port.out.PricingPort;
+import com.shopper.aggregator.application.port.out.UpstreamRejectedRequest;
 import com.shopper.aggregator.application.service.ProductViewService;
 import com.shopper.aggregator.infrastructure.adapter.UpstreamClient;
 import com.shopper.aggregator.infrastructure.adapter.availability.AvailabilityRestClient;
@@ -45,6 +46,7 @@ class AggregatorConfig {
                 .failureRateThreshold(settings.failureRate())
                 .waitDurationInOpenState(settings.openFor())
                 .permittedNumberOfCallsInHalfOpenState(3)
+                .ignoreExceptions(UpstreamRejectedRequest.class)
                 .build());
         TaggedCircuitBreakerMetrics.ofCircuitBreakerRegistry(registry).bindTo(meters);
         return registry;

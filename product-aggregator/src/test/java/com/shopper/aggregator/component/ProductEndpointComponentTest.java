@@ -200,6 +200,18 @@ class ProductEndpointComponentTest {
     }
 
     @Test
+    void rejectedRequestIsNotRetriedAndKeepsTheCircuitClosed() throws Exception {
+        stubPricing(aResponse().withStatus(400));
+
+        for (int i = 0; i < 4; i++) {
+            request("pl-PL").andExpect(status().isOk()).andExpect(jsonPath("$.price.status").value("UNAVAILABLE"));
+        }
+
+        upstreams.verify(exactly(4), getRequestedFor(urlPathEqualTo("/prices/P-1001")));
+        assertThat(circuitBreakers.circuitBreaker("pricing").getState()).isEqualTo(CircuitBreaker.State.CLOSED);
+    }
+
+    @Test
     void fastErrorIsRetriedOnce() throws Exception {
         upstreams.stubFor(get(urlPathEqualTo("/prices/P-1001")).inScenario("retry")
                 .whenScenarioStateIs(Scenario.STARTED).willReturn(aResponse().withStatus(503))

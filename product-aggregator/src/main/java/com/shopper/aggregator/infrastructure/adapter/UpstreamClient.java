@@ -18,6 +18,7 @@ import org.springframework.web.util.UriBuilder;
 import com.shopper.aggregator.application.port.out.FastUpstreamFailure;
 import com.shopper.aggregator.application.port.out.UpstreamException;
 import com.shopper.aggregator.application.port.out.UpstreamException.Failure;
+import com.shopper.aggregator.application.port.out.UpstreamRejectedRequest;
 import com.shopper.aggregator.infrastructure.config.AggregatorProperties.Upstream;
 
 import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
@@ -43,11 +44,15 @@ public class UpstreamClient {
     public <T> Optional<T> get(Function<UriBuilder, URI> uri, Class<T> type) {
         try {
             return circuitBreaker.executeSupplier(() -> rest.get().uri(uri).exchange((request, response) -> {
-                if (response.getStatusCode().value() == 404) {
+                int status = response.getStatusCode().value();
+                if (status == 404) {
                     return Optional.<T>empty();
                 }
+                if (response.getStatusCode().is4xxClientError() && status != 408 && status != 429) {
+                    throw new UpstreamRejectedRequest(name, status);
+                }
                 if (response.getStatusCode().isError()) {
-                    throw new FastUpstreamFailure(name, null);
+                    throw new FastUpstreamFailure(name, status);
                 }
                 return Optional.ofNullable(response.bodyTo(type));
             }));
@@ -65,7 +70,7 @@ public class UpstreamClient {
     }
 
     private UpstreamException logged(UpstreamException e) {
-        log.warn("{} call failed: {}", name, e.failure());
+        log.warn("{} call failed: {}", name, e.reason());
         return e;
     }
 
