@@ -45,15 +45,15 @@ flowchart LR
   C(["client"]) -- "request" --> A["aggregator"]
   A -- "X-Trace-Id" --> C
   A -- "traceparent" --> U["upstreams"]
-  A & U -- "JSON logs with traceId" --> L[("Loki · later")]
-  A & U -- "/actuator/prometheus" --> P[("Prometheus · later")]
-  A & U -. "OTLP spans" .-> T[("Tempo · later")]
-  L & P & T --> G["Grafana · later"]
+  A & U -- "JSON logs with traceId" --> L[("Loki")]
+  A & U -- "/actuator/prometheus" --> P[("Prometheus")]
+  A & U -. "OTLP spans" .-> T[("Tempo · not deployed")]
+  L & P --> G["Grafana"]
 
   classDef svc fill:#1f2937,stroke:#1f2937,color:#fff
   classDef later fill:#f3f4f6,stroke:#9ca3af,color:#6b7280,stroke-dasharray:4 3
   class A,U svc
-  class L,P,T,G later
+  class T later
 ```
 
 ### Consequences
@@ -69,5 +69,11 @@ flowchart LR
 ## More Information
 
 The cold-start effect is addressed by warming the upstream calls up before the
-readiness probe reports ready. Exporting spans to Tempo needs only an OTLP endpoint
-in configuration.
+readiness probe reports ready.
+
+The Grafana stack now runs from the same compose file under the `observability`
+profile: Prometheus scrapes every service every 5 s, Alloy ships the containers' logs to
+Loki, and Grafana provisions both data sources and one dashboard (response time against
+the budget, statuses, upstream timings and failures, circuit breaker states, degraded
+sections, warnings). Tempo is not deployed; exporting spans to it needs only an OTLP
+endpoint in configuration.

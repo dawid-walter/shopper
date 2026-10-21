@@ -58,9 +58,16 @@ flowchart LR
   can return one directly if a 5xx case is needed.
 * Neutral, because toxicity applies per connection, and the HTTP client reuses
   connections, so failures arrive in bursts rather than independently. Real outages
-  behave that way too, and bursts are what open a circuit breaker.
+  behave that way too, and bursts are what open a circuit breaker. With pooled
+  connections the realistic failure toxics fire less often than configured; failure
+  scenarios therefore use a toxicity of 1.
 
 ## More Information
+
+Toxiproxy runs in the default `docker compose up`, between the aggregator and every
+upstream, with latency and jitter from each upstream's typical latency and a
+connection-reset toxic at 1 − reliability. Scenarios are switched on through its API on
+port 8474.
 
 `tc netem` was rejected because packet loss shows up as TCP retransmissions rather than
 clear, observable failures.
