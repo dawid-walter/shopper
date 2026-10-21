@@ -150,6 +150,18 @@ class ProductEndpointComponentTest {
     }
 
     @Test
+    void unpricedProductShowsThePriceAsUnavailable() throws Exception {
+        stubPricing(aResponse().withStatus(404));
+
+        request("pl-PL")
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.price.status").value("UNAVAILABLE"))
+                .andExpect(jsonPath("$.stock.status").value("KNOWN"));
+
+        upstreams.verify(exactly(1), getRequestedFor(urlPathEqualTo("/prices/P-1001")));
+    }
+
+    @Test
     @Timeout(2)
     void hangingPricingDoesNotHoldTheResponse() throws Exception {
         stubPricing(okJson("{}").withFixedDelay(5_000));
