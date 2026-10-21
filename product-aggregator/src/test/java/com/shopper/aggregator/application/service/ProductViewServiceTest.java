@@ -48,7 +48,7 @@ class ProductViewServiceTest {
 
     private final ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor();
 
-    private CatalogPort catalog = (id, market) -> OIL_FILTER;
+    private CatalogPort catalog = (id, market) -> Optional.of(OIL_FILTER);
     private PricingPort pricing = (id, market, customer) -> Optional.of(PRICE);
     private AvailabilityPort availability = (id, market) -> Optional.of(STOCK);
     private CustomerPort customers = id -> Optional.of(DEALER);
@@ -96,9 +96,7 @@ class ProductViewServiceTest {
 
     @Test
     void unknownProductIsNotFound() {
-        catalog = (id, market) -> {
-            throw new ProductNotFoundException(id);
-        };
+        catalog = (id, market) -> Optional.empty();
 
         assertThatThrownBy(() -> get(null)).isInstanceOf(ProductNotFoundException.class);
     }

@@ -62,7 +62,7 @@ public class ProductViewService implements GetProductView {
                 .map(id -> inParallel(() -> customers.customer(id)))
                 .orElseGet(() -> CompletableFuture.completedFuture(Optional.empty()));
 
-        return new ProductView(productId, market, awaitCatalog(product, deadline),
+        return new ProductView(productId, market, awaitCatalog(productId, product, deadline),
                 awaitOptional(price, deadline), awaitOptional(stock, deadline), awaitOptional(profile, deadline));
     }
 
@@ -70,15 +70,15 @@ public class ProductViewService implements GetProductView {
         return CompletableFuture.supplyAsync(call, executor);
     }
 
-    private ProductDetails awaitCatalog(CompletableFuture<ProductDetails> future, Instant deadline) {
+    private ProductDetails awaitCatalog(ProductId productId, CompletableFuture<Optional<ProductDetails>> future,
+                                        Instant deadline) {
+        Optional<ProductDetails> details;
         try {
-            return future.orTimeout(remaining(deadline).toMillis(), TimeUnit.MILLISECONDS).join();
+            details = future.orTimeout(remaining(deadline).toMillis(), TimeUnit.MILLISECONDS).join();
         } catch (CompletionException e) {
-            if (e.getCause() instanceof ProductNotFoundException notFound) {
-                throw notFound;
-            }
             throw new CatalogUnavailableException(e.getCause());
         }
+        return details.orElseThrow(() -> new ProductNotFoundException(productId));
     }
 
     private <T> Optional<T> awaitOptional(CompletableFuture<Optional<T>> future, Instant deadline) {
