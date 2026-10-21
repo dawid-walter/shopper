@@ -35,8 +35,8 @@ stack only has to collect what they already emit.
 
 | Concern | Decision |
 |---|---|
-| Logs | JSON (ECS) in containers; `WARN` when an upstream call fails (upstream and failure kind) and when the aggregator answers `503`; successful calls are not logged |
-| Metrics | Actuator with a Prometheus endpoint; HTTP server and client timings; circuit breaker state per upstream; a counter of degraded sections per section |
+| Logs | JSON (ECS) in containers; `WARN` when an upstream call fails (upstream, failure kind and HTTP status if any) and when the aggregator answers `503`; `ERROR` when an optional section fails for an unexpected reason; successful calls are not logged |
+| Metrics | Actuator with a Prometheus endpoint; HTTP server and client timings; circuit breaker state per upstream; a counter of degraded sections per section; a counter of failed upstream calls per upstream and failure kind |
 | Health | liveness and readiness probes that do **not** depend on upstreams, so one failing upstream never takes the aggregator out of the load balancer |
 | Trace context | Micrometer Tracing with OpenTelemetry in every service; `traceparent` propagated to upstreams, also from the aggregator's virtual threads; the trace id returned to clients in `X-Trace-Id` and present in every log line |
 

@@ -36,7 +36,7 @@ reliability counts fast errors; failures are independent between attempts.
 |---|---|---|
 | Timeout per upstream | Catalog 235 ms, Customer 280 ms, Pricing 375 ms, Availability 470 ms | p99.9 of each latency distribution, the time within which 99.9% of normal responses arrive: cuts 0.1% of good answers, against 1% at p99 (1 in 100 slower) |
 | Request budget | 500 ms | calls run in parallel, so the slowest timeout bounds the request |
-| Retry | once, fast errors only (5xx, refused connection), no delay; Spring's `@Retryable` on each adapter | one retry turns failure `p` into `p²` (Availability 97.9% → 99.86%); a timeout has used its time and is not retried; the request budget still bounds the latency |
+| Retry | once, fast errors only (5xx, `408`, `429`, refused connection), no delay; Spring's `@Retryable` on each adapter | one retry turns failure `p` into `p²` (Availability 97.9% → 99.86%); a timeout has used its time and is not retried; the request budget still bounds the latency |
 | Circuit breaker | open at ≥ 50% failures over the last 20 calls, 10 s open, then half-open | a false trip at a 3% failure rate has probability ≈ 8 × 10⁻¹¹; a real outage opens it within about 20 calls |
 
 ### Consequences
@@ -51,6 +51,11 @@ reliability counts fast errors; failures are independent between attempts.
 
 The values should be recomputed from measured p99.9 latency and error rates when the
 upstreams change or when metrics are available.
+
+Other 4xx responses mean the upstream rejected the request, not that it failed: they are
+not retried and the circuit breaker ignores them, so bad input cannot open the circuit
+of a healthy upstream. A `404` means the data does not exist and degrades only its
+section.
 
 The retry counts toward the circuit breaker's window: a request whose call is retried adds
 two calls to it. During an outage of fast errors the circuit therefore opens after about
