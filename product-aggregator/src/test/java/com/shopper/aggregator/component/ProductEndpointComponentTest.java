@@ -182,6 +182,12 @@ class ProductEndpointComponentTest {
     }
 
     @Test
+    void blankCustomerIdIs400() throws Exception {
+        mvc.perform(MockMvcRequestBuilders.get("/products/P-1001").param("market", "pl-PL").param("customerId", " "))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
     void openCircuitStopsCallingPricing() throws Exception {
         stubPricing(aResponse().withStatus(500));
 

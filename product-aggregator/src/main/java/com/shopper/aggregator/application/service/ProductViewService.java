@@ -16,9 +16,10 @@ import com.shopper.aggregator.application.port.out.CatalogPort;
 import com.shopper.aggregator.application.port.out.CustomerPort;
 import com.shopper.aggregator.application.port.out.PricingPort;
 import com.shopper.aggregator.domain.CatalogUnavailableException;
-import com.shopper.aggregator.domain.CustomerProfile;
+import com.shopper.aggregator.domain.CustomerId;
 import com.shopper.aggregator.domain.Market;
 import com.shopper.aggregator.domain.ProductDetails;
+import com.shopper.aggregator.domain.ProductId;
 import com.shopper.aggregator.domain.ProductNotFoundException;
 import com.shopper.aggregator.domain.ProductView;
 
@@ -45,15 +46,15 @@ public class ProductViewService implements GetProductView {
     }
 
     @Override
-    public ProductView get(String productId, Market market, String customerId) {
+    public ProductView get(ProductId productId, Market market, Optional<CustomerId> customerId) {
         Instant deadline = clock.instant().plus(budget);
 
         var product = inParallel(() -> catalog.find(productId, market));
         var price = inParallel(() -> pricing.price(productId, market, customerId));
         var stock = inParallel(() -> availability.stock(productId, market));
-        var profile = customerId == null
-                ? CompletableFuture.completedFuture(Optional.<CustomerProfile>empty())
-                : inParallel(() -> customers.customer(customerId));
+        var profile = customerId
+                .map(id -> inParallel(() -> customers.customer(id)))
+                .orElseGet(() -> CompletableFuture.completedFuture(Optional.empty()));
 
         return new ProductView(productId, market, awaitCatalog(product, deadline),
                 awaitOptional(price, deadline), awaitOptional(stock, deadline), awaitOptional(profile, deadline));

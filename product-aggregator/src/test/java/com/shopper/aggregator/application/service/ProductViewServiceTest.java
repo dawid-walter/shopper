@@ -23,10 +23,12 @@ import com.shopper.aggregator.application.port.out.PricingPort;
 import com.shopper.aggregator.application.port.out.UpstreamException;
 import com.shopper.aggregator.application.port.out.UpstreamException.Failure;
 import com.shopper.aggregator.domain.CatalogUnavailableException;
+import com.shopper.aggregator.domain.CustomerId;
 import com.shopper.aggregator.domain.CustomerProfile;
 import com.shopper.aggregator.domain.Market;
 import com.shopper.aggregator.domain.Price;
 import com.shopper.aggregator.domain.ProductDetails;
+import com.shopper.aggregator.domain.ProductId;
 import com.shopper.aggregator.domain.ProductNotFoundException;
 import com.shopper.aggregator.domain.ProductView;
 import com.shopper.aggregator.domain.Stock;
@@ -56,7 +58,7 @@ class ProductViewServiceTest {
 
     private ProductView get(String customerId) {
         return new ProductViewService(catalog, pricing, availability, customers, BUDGET, executor,
-                Clock.systemUTC()).get("P-1001", PL, customerId);
+                Clock.systemUTC()).get(new ProductId("P-1001"), PL, Optional.ofNullable(customerId).map(CustomerId::new));
     }
 
     private static UpstreamException failure(Failure failure) {

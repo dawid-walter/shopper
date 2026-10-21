@@ -7,6 +7,7 @@ import org.springframework.resilience.annotation.Retryable;
 
 import com.shopper.aggregator.application.port.out.CustomerPort;
 import com.shopper.aggregator.application.port.out.FastUpstreamFailure;
+import com.shopper.aggregator.domain.CustomerId;
 import com.shopper.aggregator.domain.CustomerProfile;
 import com.shopper.aggregator.infrastructure.adapter.UpstreamClient;
 
@@ -23,8 +24,8 @@ public class CustomerRestClient implements CustomerPort {
 
     @Override
     @Retryable(includes = FastUpstreamFailure.class, maxRetries = 1, delay = 0)
-    public Optional<CustomerProfile> customer(String customerId) {
-        return client.get(uri -> uri.path("/customers/{id}").build(customerId), Customer.class)
+    public Optional<CustomerProfile> customer(CustomerId customerId) {
+        return client.get(uri -> uri.path("/customers/{id}").build(customerId.value()), Customer.class)
                 .map(c -> new CustomerProfile(c.segment(), c.preferences()));
     }
 }

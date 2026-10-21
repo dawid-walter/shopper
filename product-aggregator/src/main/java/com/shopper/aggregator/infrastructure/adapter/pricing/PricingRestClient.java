@@ -7,8 +7,10 @@ import org.springframework.resilience.annotation.Retryable;
 
 import com.shopper.aggregator.application.port.out.PricingPort;
 import com.shopper.aggregator.application.port.out.FastUpstreamFailure;
+import com.shopper.aggregator.domain.CustomerId;
 import com.shopper.aggregator.domain.Market;
 import com.shopper.aggregator.domain.Price;
+import com.shopper.aggregator.domain.ProductId;
 import com.shopper.aggregator.infrastructure.adapter.UpstreamClient;
 
 public class PricingRestClient implements PricingPort {
@@ -25,11 +27,11 @@ public class PricingRestClient implements PricingPort {
 
     @Override
     @Retryable(includes = FastUpstreamFailure.class, maxRetries = 1, delay = 0)
-    public Optional<Price> price(String productId, Market market, String customerId) {
+    public Optional<Price> price(ProductId productId, Market market, Optional<CustomerId> customerId) {
         return client.get(uri -> uri.path("/prices/{id}")
                                 .queryParam("market", market.code())
-                                .queryParamIfPresent("customerId", Optional.ofNullable(customerId))
-                                .build(productId),
+                                .queryParamIfPresent("customerId", customerId.map(CustomerId::value))
+                                .build(productId.value()),
                         PricingQuote.class)
                 .map(q -> new Price(q.currency(), q.basePrice(), q.discount(), q.netPrice(), q.vat(), q.finalPrice()));
     }

@@ -34,7 +34,7 @@ record ProductResponse(String productId, String market, Product product, PriceVi
 
     static ProductResponse from(ProductView view) {
         var details = view.product();
-        return new ProductResponse(view.productId(), view.market().code(),
+        return new ProductResponse(view.productId().value(), view.market().code(),
                 new Product(details.name(), details.description(), details.specs(), details.images()),
                 view.price()
                         .map(p -> new PriceView("AVAILABLE", p.currency(), p.basePrice(), p.discount(), p.netPrice(),

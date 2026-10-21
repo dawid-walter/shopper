@@ -9,6 +9,7 @@ import com.shopper.aggregator.application.port.out.CatalogPort;
 import com.shopper.aggregator.application.port.out.FastUpstreamFailure;
 import com.shopper.aggregator.domain.Market;
 import com.shopper.aggregator.domain.ProductDetails;
+import com.shopper.aggregator.domain.ProductId;
 import com.shopper.aggregator.domain.ProductNotFoundException;
 import com.shopper.aggregator.infrastructure.adapter.UpstreamClient;
 
@@ -25,8 +26,8 @@ public class CatalogRestClient implements CatalogPort {
 
     @Override
     @Retryable(includes = FastUpstreamFailure.class, maxRetries = 1, delay = 0)
-    public ProductDetails find(String productId, Market market) {
-        return client.get(uri -> uri.path("/products/{id}").queryParam("locale", market.code()).build(productId),
+    public ProductDetails find(ProductId productId, Market market) {
+        return client.get(uri -> uri.path("/products/{id}").queryParam("locale", market.code()).build(productId.value()),
                         CatalogProduct.class)
                 .map(p -> new ProductDetails(p.name(), p.description(), p.specs(), p.images()))
                 .orElseThrow(() -> new ProductNotFoundException(productId));

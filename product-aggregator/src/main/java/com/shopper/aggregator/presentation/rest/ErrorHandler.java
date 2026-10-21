@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import com.shopper.aggregator.domain.CatalogUnavailableException;
+import com.shopper.aggregator.domain.InvalidIdentifierException;
 import com.shopper.aggregator.domain.ProductNotFoundException;
 import com.shopper.aggregator.domain.UnsupportedMarketException;
 
@@ -16,8 +17,8 @@ class ErrorHandler {
 
     private static final Logger log = LoggerFactory.getLogger(ErrorHandler.class);
 
-    @ExceptionHandler(UnsupportedMarketException.class)
-    ProblemDetail badRequest(UnsupportedMarketException e) {
+    @ExceptionHandler({UnsupportedMarketException.class, InvalidIdentifierException.class})
+    ProblemDetail badRequest(RuntimeException e) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, e.getMessage());
     }
 
