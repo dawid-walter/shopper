@@ -240,6 +240,17 @@ class ProductEndpointComponentTest {
     }
 
     @Test
+    void upstreamFailuresAreCountedByReason() throws Exception {
+        stubPricing(aResponse().withStatus(500));
+        double before = meters.counter("aggregator.upstream.failures", "upstream", "pricing", "reason", "ERROR").count();
+
+        request("pl-PL");
+
+        assertThat(meters.counter("aggregator.upstream.failures", "upstream", "pricing", "reason", "ERROR").count())
+                .isEqualTo(before + 2);
+    }
+
+    @Test
     void degradedSectionIsCounted() throws Exception {
         stubPricing(aResponse().withStatus(500));
         double before = meters.counter("aggregator.sections.degraded", "section", "price").count();

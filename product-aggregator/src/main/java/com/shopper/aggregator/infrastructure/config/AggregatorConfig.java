@@ -54,27 +54,27 @@ class AggregatorConfig {
 
     @Bean
     CatalogPort catalogPort(AggregatorProperties properties, CircuitBreakerRegistry breakers,
-                            RestClient.Builder builder) {
-        return new CatalogRestClient(client("catalog", properties.upstreams().catalog(), breakers, builder));
+                            RestClient.Builder builder, MeterRegistry meters) {
+        return new CatalogRestClient(client("catalog", properties.upstreams().catalog(), breakers, builder, meters));
     }
 
     @Bean
     PricingPort pricingPort(AggregatorProperties properties, CircuitBreakerRegistry breakers,
-                            RestClient.Builder builder) {
-        return new PricingRestClient(client("pricing", properties.upstreams().pricing(), breakers, builder));
+                            RestClient.Builder builder, MeterRegistry meters) {
+        return new PricingRestClient(client("pricing", properties.upstreams().pricing(), breakers, builder, meters));
     }
 
     @Bean
     AvailabilityPort availabilityPort(AggregatorProperties properties, CircuitBreakerRegistry breakers,
-                                      RestClient.Builder builder) {
+                                      RestClient.Builder builder, MeterRegistry meters) {
         return new AvailabilityRestClient(
-                client("availability", properties.upstreams().availability(), breakers, builder));
+                client("availability", properties.upstreams().availability(), breakers, builder, meters));
     }
 
     @Bean
     CustomerPort customerPort(AggregatorProperties properties, CircuitBreakerRegistry breakers,
-                              RestClient.Builder builder) {
-        return new CustomerRestClient(client("customer", properties.upstreams().customer(), breakers, builder));
+                              RestClient.Builder builder, MeterRegistry meters) {
+        return new CustomerRestClient(client("customer", properties.upstreams().customer(), breakers, builder, meters));
     }
 
     @Bean(destroyMethod = "shutdown")
@@ -92,7 +92,7 @@ class AggregatorConfig {
     }
 
     private static UpstreamClient client(String name, Upstream upstream, CircuitBreakerRegistry breakers,
-                                         RestClient.Builder builder) {
-        return new UpstreamClient(name, upstream, breakers.circuitBreaker(name), builder);
+                                         RestClient.Builder builder, MeterRegistry meters) {
+        return new UpstreamClient(name, upstream, breakers.circuitBreaker(name), builder, meters);
     }
 }

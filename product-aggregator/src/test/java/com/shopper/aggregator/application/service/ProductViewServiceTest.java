@@ -124,6 +124,18 @@ class ProductViewServiceTest {
     }
 
     @Test
+    void unexpectedFailureStillDegradesOnlyThePrice() {
+        pricing = (id, market, customer) -> {
+            throw new IllegalStateException("mapping bug");
+        };
+
+        ProductView view = get(null);
+
+        assertThat(view.price()).isEmpty();
+        assertThat(view.stock()).contains(STOCK);
+    }
+
+    @Test
     void failingAvailabilityMakesStockUnknown() {
         availability = (id, market) -> {
             throw failure(Failure.CIRCUIT_OPEN);

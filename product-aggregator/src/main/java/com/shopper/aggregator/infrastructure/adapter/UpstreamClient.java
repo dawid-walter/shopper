@@ -23,6 +23,7 @@ import com.shopper.aggregator.infrastructure.config.AggregatorProperties.Upstrea
 
 import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
+import io.micrometer.core.instrument.MeterRegistry;
 
 public class UpstreamClient {
 
@@ -31,14 +32,17 @@ public class UpstreamClient {
     private final String name;
     private final RestClient rest;
     private final CircuitBreaker circuitBreaker;
+    private final MeterRegistry meters;
 
-    public UpstreamClient(String name, Upstream upstream, CircuitBreaker circuitBreaker, RestClient.Builder builder) {
+    public UpstreamClient(String name, Upstream upstream, CircuitBreaker circuitBreaker, RestClient.Builder builder,
+                          MeterRegistry meters) {
         var requestFactory = new JdkClientHttpRequestFactory(
                 HttpClient.newBuilder().connectTimeout(upstream.timeout()).build());
         requestFactory.setReadTimeout(upstream.timeout());
         this.name = name;
         this.rest = builder.clone().baseUrl(upstream.url().toString()).requestFactory(requestFactory).build();
         this.circuitBreaker = circuitBreaker;
+        this.meters = meters;
     }
 
     public <T> Optional<T> get(Function<UriBuilder, URI> uri, Class<T> type) {
@@ -71,6 +75,7 @@ public class UpstreamClient {
 
     private UpstreamException logged(UpstreamException e) {
         log.warn("{} call failed: {}", name, e.reason());
+        meters.counter("aggregator.upstream.failures", "upstream", name, "reason", e.failure().name()).increment();
         return e;
     }
 

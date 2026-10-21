@@ -10,11 +10,15 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.shopper.aggregator.application.port.in.GetProductView;
 import com.shopper.aggregator.application.port.out.AvailabilityPort;
 import com.shopper.aggregator.application.port.out.CatalogPort;
 import com.shopper.aggregator.application.port.out.CustomerPort;
 import com.shopper.aggregator.application.port.out.PricingPort;
+import com.shopper.aggregator.application.port.out.UpstreamException;
 import com.shopper.aggregator.domain.CatalogUnavailableException;
 import com.shopper.aggregator.domain.CustomerId;
 import com.shopper.aggregator.domain.Market;
@@ -24,6 +28,8 @@ import com.shopper.aggregator.domain.ProductNotFoundException;
 import com.shopper.aggregator.domain.ProductView;
 
 public class ProductViewService implements GetProductView {
+
+    private static final Logger log = LoggerFactory.getLogger(ProductViewService.class);
 
     private final CatalogPort catalog;
     private final PricingPort pricing;
@@ -77,8 +83,16 @@ public class ProductViewService implements GetProductView {
 
     private <T> Optional<T> awaitOptional(CompletableFuture<Optional<T>> future, Instant deadline) {
         return future.completeOnTimeout(Optional.empty(), remaining(deadline).toMillis(), TimeUnit.MILLISECONDS)
-                .exceptionally(failure -> Optional.empty())
+                .exceptionally(ProductViewService::degrade)
                 .join();
+    }
+
+    private static <T> Optional<T> degrade(Throwable failure) {
+        Throwable cause = failure instanceof CompletionException ? failure.getCause() : failure;
+        if (!(cause instanceof UpstreamException)) {
+            log.error("Unexpected failure in an optional section", cause);
+        }
+        return Optional.empty();
     }
 
     private Duration remaining(Instant deadline) {
