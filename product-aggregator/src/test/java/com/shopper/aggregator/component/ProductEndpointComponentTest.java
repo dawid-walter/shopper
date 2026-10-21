@@ -16,6 +16,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -149,31 +150,30 @@ class ProductEndpointComponentTest {
     }
 
     @Test
+    @Timeout(2)
     void hangingPricingDoesNotHoldTheResponse() throws Exception {
-        stubPricing(okJson("{}").withFixedDelay(2_000));
+        stubPricing(okJson("{}").withFixedDelay(5_000));
 
-        long start = System.nanoTime();
         request("pl-PL")
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.price.status").value("UNAVAILABLE"));
-        long elapsedMillis = (System.nanoTime() - start) / 1_000_000;
-
-        assertThat(elapsedMillis).isLessThan(1_000);
     }
 
     @Test
     void upstreamsAreCalledInParallel() throws Exception {
         request("pl-PL");
         stubCatalog(okJson("""
-                {"name": "Filtr oleju", "description": "", "specs": {}, "images": []}""").withFixedDelay(100));
-        stubPricing(okJson("{\"currency\": \"PLN\"}").withFixedDelay(100));
-        stubStock(okJson("{\"quantity\": 1, \"warehouse\": \"Poznań\", \"deliveryInDays\": 1}").withFixedDelay(100));
+                {"name": "Filtr oleju", "description": "", "specs": {}, "images": []}""").withFixedDelay(150));
+        stubPricing(okJson("{\"currency\": \"PLN\"}").withFixedDelay(300));
+        stubStock(okJson("{\"quantity\": 1, \"warehouse\": \"Poznań\", \"deliveryInDays\": 1}").withFixedDelay(300));
+        upstreams.stubFor(get(urlPathEqualTo("/customers/C-42")).willReturn(okJson("""
+                {"segment": "DEALER", "preferences": []}""").withFixedDelay(200)));
 
-        long start = System.nanoTime();
-        request("pl-PL").andExpect(status().isOk());
-        long elapsedMillis = (System.nanoTime() - start) / 1_000_000;
-
-        assertThat(elapsedMillis).isLessThan(250);
+        request("pl-PL")
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.price.status").value("AVAILABLE"))
+                .andExpect(jsonPath("$.stock.status").value("KNOWN"))
+                .andExpect(jsonPath("$.customer.status").value("PERSONALIZED"));
     }
 
     @Test

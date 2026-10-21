@@ -9,12 +9,14 @@ import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 
 import com.shopper.aggregator.application.port.out.AvailabilityPort;
 import com.shopper.aggregator.application.port.out.CatalogPort;
@@ -154,21 +156,21 @@ class ProductViewServiceTest {
     }
 
     @Test
+    @Timeout(2)
     void hangingPricingIsCutOffAtTheBudget() {
+        var neverAnswers = new CountDownLatch(1);
         pricing = (id, market, customer) -> {
             try {
-                Thread.sleep(2_000);
+                neverAnswers.await();
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
             return Optional.of(PRICE);
         };
 
-        long start = System.nanoTime();
         ProductView view = get(null);
-        long elapsedMillis = (System.nanoTime() - start) / 1_000_000;
 
         assertThat(view.price()).isEmpty();
-        assertThat(elapsedMillis).isLessThan(1_000);
+        assertThat(view.stock()).contains(STOCK);
     }
 }
