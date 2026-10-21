@@ -33,7 +33,7 @@ import com.shopper.aggregator.domain.Stock;
 
 class ProductViewServiceTest {
 
-    private static final Market PL = Market.of("pl-PL");
+    private static final Market PL = new Market("pl-PL");
     private static final ProductDetails OIL_FILTER =
             new ProductDetails("Filtr oleju", "Filtr oleju do silników ciągników.", Map.of(), List.of());
     private static final Price PRICE = new Price("PLN", new BigDecimal("100.00"), BigDecimal.ZERO,

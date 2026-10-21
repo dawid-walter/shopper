@@ -6,10 +6,9 @@ public record Market(String code) {
 
     private static final Set<String> SUPPORTED = Set.of("pl-PL", "de-DE", "nl-NL");
 
-    public static Market of(String code) {
+    public Market {
         if (!SUPPORTED.contains(code)) {
-            throw new IllegalArgumentException("Unsupported market: " + code);
+            throw new UnsupportedMarketException(code);
         }
-        return new Market(code);
     }
 }

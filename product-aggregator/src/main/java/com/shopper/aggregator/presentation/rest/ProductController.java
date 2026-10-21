@@ -26,7 +26,7 @@ class ProductController {
     ProductResponse product(@PathVariable String productId,
                             @RequestParam String market,
                             @RequestParam(required = false) String customerId) {
-        ProductView view = getProductView.get(productId, Market.of(market), customerId);
+        ProductView view = getProductView.get(productId, new Market(market), customerId);
         countDegradedSections(view, customerId != null);
         return ProductResponse.from(view);
     }

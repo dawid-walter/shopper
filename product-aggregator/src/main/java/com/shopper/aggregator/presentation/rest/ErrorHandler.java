@@ -9,14 +9,15 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import com.shopper.aggregator.domain.CatalogUnavailableException;
 import com.shopper.aggregator.domain.ProductNotFoundException;
+import com.shopper.aggregator.domain.UnsupportedMarketException;
 
 @RestControllerAdvice
 class ErrorHandler {
 
     private static final Logger log = LoggerFactory.getLogger(ErrorHandler.class);
 
-    @ExceptionHandler(IllegalArgumentException.class)
-    ProblemDetail badRequest(IllegalArgumentException e) {
+    @ExceptionHandler(UnsupportedMarketException.class)
+    ProblemDetail badRequest(UnsupportedMarketException e) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, e.getMessage());
     }
 
