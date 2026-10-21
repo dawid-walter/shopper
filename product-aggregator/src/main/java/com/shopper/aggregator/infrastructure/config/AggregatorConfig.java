@@ -27,6 +27,7 @@ import io.github.resilience4j.circuitbreaker.CircuitBreakerConfig.SlidingWindowT
 import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
 import io.github.resilience4j.micrometer.tagged.TaggedCircuitBreakerMetrics;
 import io.micrometer.context.ContextExecutorService;
+import io.micrometer.context.ContextSnapshotFactory;
 import io.micrometer.core.instrument.MeterRegistry;
 
 @Configuration
@@ -76,7 +77,8 @@ class AggregatorConfig {
 
     @Bean(destroyMethod = "shutdown")
     ExecutorService upstreamExecutor() {
-        return ContextExecutorService.wrap(Executors.newVirtualThreadPerTaskExecutor());
+        return ContextExecutorService.wrap(Executors.newVirtualThreadPerTaskExecutor(),
+                ContextSnapshotFactory.builder().build());
     }
 
     @Bean
