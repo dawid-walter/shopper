@@ -22,6 +22,7 @@ subprojects {
         "implementation"("org.springframework.boot:spring-boot-starter-webmvc")
         "implementation"("org.springframework.boot:spring-boot-starter-actuator")
         "implementation"("org.springframework.boot:spring-boot-starter-opentelemetry")
+        "implementation"("org.springdoc:springdoc-openapi-starter-webmvc-ui:3.1.1")
         "runtimeOnly"("io.micrometer:micrometer-registry-prometheus")
         "testImplementation"("org.springframework.boot:spring-boot-starter-webmvc-test")
         "testRuntimeOnly"("org.junit.platform:junit-platform-launcher")

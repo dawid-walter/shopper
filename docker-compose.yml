@@ -1,0 +1,35 @@
+services:
+  product-aggregator:
+    build: { context: ., args: { SERVICE: product-aggregator } }
+    ports: ["8080:8080"]
+    environment:
+      LOGGING_STRUCTURED_FORMAT_CONSOLE: ecs
+      AGGREGATOR_UPSTREAMS_CATALOG_URL: http://catalog-service:8081
+      AGGREGATOR_UPSTREAMS_PRICING_URL: http://pricing-service:8082
+      AGGREGATOR_UPSTREAMS_AVAILABILITY_URL: http://availability-service:8083
+      AGGREGATOR_UPSTREAMS_CUSTOMER_URL: http://customer-service:8084
+    depends_on: [catalog-service, pricing-service, availability-service, customer-service]
+
+  catalog-service:
+    build: { context: ., args: { SERVICE: catalog-service } }
+    ports: ["8081:8081"]
+    environment:
+      LOGGING_STRUCTURED_FORMAT_CONSOLE: ecs
+
+  pricing-service:
+    build: { context: ., args: { SERVICE: pricing-service } }
+    ports: ["8082:8082"]
+    environment:
+      LOGGING_STRUCTURED_FORMAT_CONSOLE: ecs
+
+  availability-service:
+    build: { context: ., args: { SERVICE: availability-service } }
+    ports: ["8083:8083"]
+    environment:
+      LOGGING_STRUCTURED_FORMAT_CONSOLE: ecs
+
+  customer-service:
+    build: { context: ., args: { SERVICE: customer-service } }
+    ports: ["8084:8084"]
+    environment:
+      LOGGING_STRUCTURED_FORMAT_CONSOLE: ecs
