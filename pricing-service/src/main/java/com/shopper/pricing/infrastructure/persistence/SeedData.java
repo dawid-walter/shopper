@@ -40,6 +40,9 @@ public final class SeedData {
         components.save(component("list-price-de", "List price DE", LIST_PRICE,
                 new FixedCalculator(Money.of("25.00", "EUR")), Validity.always(),
                 new Applicability(Set.of(DE_DE), Set.of("P-1001"), Set.of())));
+        components.save(component("list-price-nl", "List price NL", LIST_PRICE,
+                new FixedCalculator(Money.of("26.00", "EUR")), Validity.always(),
+                new Applicability(Set.of(NL_NL), Set.of("P-1001"), Set.of())));
         components.save(component("flash-sale-pl", "Black Friday PL", DISCOUNT,
                 percent("-20"),
                 Validity.between(Instant.parse("2026-11-27T00:00:00Z"), Instant.parse("2026-11-30T00:00:00Z")),
@@ -56,7 +59,7 @@ public final class SeedData {
         return Map.of(
                 PL_PL, new Tariff(PL_PL, List.of("list-price-pl", "flash-sale-pl", "contract-discount", "vat-pl")),
                 DE_DE, new Tariff(DE_DE, List.of("list-price-de", "contract-discount", "vat-de")),
-                NL_NL, new Tariff(NL_NL, List.of("contract-discount", "vat-nl")));
+                NL_NL, new Tariff(NL_NL, List.of("list-price-nl", "contract-discount", "vat-nl")));
     }
 
     private static PriceComponent vat(String id, Market market, String rate) {

@@ -20,9 +20,17 @@ class PricingApiTest {
     MockMvc mvc;
 
     @Test
-    void unpricedProductOrMarketIs404() throws Exception {
+    void unpricedProductIs404() throws Exception {
         mvc.perform(get("/prices/P-9999").param("market", "pl-PL")).andExpect(status().isNotFound());
-        mvc.perform(get("/prices/P-1001").param("market", "nl-NL")).andExpect(status().isNotFound());
+    }
+
+    @Test
+    void everyMarketIsPricedInItsCurrencyAndVat() throws Exception {
+        mvc.perform(get("/prices/P-1001").param("market", "nl-NL"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.currency").value("EUR"))
+                .andExpect(jsonPath("$.vat").value(5.46))
+                .andExpect(jsonPath("$.finalPrice").value(31.46));
     }
 
     @Test
