@@ -1,0 +1,7 @@
+apiVersion: 1
+
+providers:
+  - name: shopper
+    type: file
+    options:
+      path: /var/lib/grafana/dashboards

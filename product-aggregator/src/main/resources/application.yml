@@ -42,3 +42,8 @@ management:
     metrics:
       export:
         enabled: false
+  metrics:
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+        http.client.requests: true

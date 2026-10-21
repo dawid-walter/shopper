@@ -1,0 +1,6 @@
+[
+  { "name": "catalog", "listen": "0.0.0.0:8081", "upstream": "catalog-service:8081", "enabled": true },
+  { "name": "pricing", "listen": "0.0.0.0:8082", "upstream": "pricing-service:8082", "enabled": true },
+  { "name": "availability", "listen": "0.0.0.0:8083", "upstream": "availability-service:8083", "enabled": true },
+  { "name": "customer", "listen": "0.0.0.0:8084", "upstream": "customer-service:8084", "enabled": true }
+]

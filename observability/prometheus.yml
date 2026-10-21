@@ -1,0 +1,19 @@
+global:
+  scrape_interval: 5s
+
+scrape_configs:
+  - job_name: product-aggregator
+    metrics_path: /actuator/prometheus
+    static_configs: [{ targets: ["product-aggregator:8080"] }]
+  - job_name: catalog-service
+    metrics_path: /actuator/prometheus
+    static_configs: [{ targets: ["catalog-service:8081"] }]
+  - job_name: pricing-service
+    metrics_path: /actuator/prometheus
+    static_configs: [{ targets: ["pricing-service:8082"] }]
+  - job_name: availability-service
+    metrics_path: /actuator/prometheus
+    static_configs: [{ targets: ["availability-service:8083"] }]
+  - job_name: customer-service
+    metrics_path: /actuator/prometheus
+    static_configs: [{ targets: ["customer-service:8084"] }]

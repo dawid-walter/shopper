@@ -4,11 +4,11 @@ services:
     ports: ["8080:8080"]
     environment:
       LOGGING_STRUCTURED_FORMAT_CONSOLE: ecs
-      AGGREGATOR_UPSTREAMS_CATALOG_URL: http://catalog-service:8081
-      AGGREGATOR_UPSTREAMS_PRICING_URL: http://pricing-service:8082
-      AGGREGATOR_UPSTREAMS_AVAILABILITY_URL: http://availability-service:8083
-      AGGREGATOR_UPSTREAMS_CUSTOMER_URL: http://customer-service:8084
-    depends_on: [catalog-service, pricing-service, availability-service, customer-service]
+      AGGREGATOR_UPSTREAMS_CATALOG_URL: http://catalog-proxy:8081
+      AGGREGATOR_UPSTREAMS_PRICING_URL: http://pricing-proxy:8082
+      AGGREGATOR_UPSTREAMS_AVAILABILITY_URL: http://availability-proxy:8083
+      AGGREGATOR_UPSTREAMS_CUSTOMER_URL: http://customer-proxy:8084
+    depends_on: [toxiproxy]
 
   catalog-service:
     build: { context: ., args: { SERVICE: catalog-service } }
@@ -33,3 +33,54 @@ services:
     ports: ["8084:8084"]
     environment:
       LOGGING_STRUCTURED_FORMAT_CONSOLE: ecs
+
+  toxiproxy:
+    image: ghcr.io/shopify/toxiproxy:2.13.0
+    command: ["-host=0.0.0.0", "-config=/config/toxiproxy.json"]
+    volumes: ["./toxiproxy:/config:ro"]
+    ports: ["8474:8474"]
+    networks:
+      default:
+        aliases: [catalog-proxy, pricing-proxy, availability-proxy, customer-proxy]
+    depends_on: [catalog-service, pricing-service, availability-service, customer-service]
+
+  toxiproxy-setup:
+    image: curlimages/curl:8.23.0
+    entrypoint: ["sh", "/config/realistic-toxics.sh"]
+    volumes: ["./toxiproxy:/config:ro"]
+    depends_on: [toxiproxy]
+
+  prometheus:
+    image: prom/prometheus:v3.15.0
+    profiles: [observability]
+    volumes: ["./observability/prometheus.yml:/etc/prometheus/prometheus.yml:ro"]
+    ports: ["9090:9090"]
+
+  loki:
+    image: grafana/loki:3.7.9
+    profiles: [observability]
+    command: ["-config.file=/etc/loki/local-config.yaml"]
+    ports: ["3100:3100"]
+
+  alloy:
+    image: grafana/alloy:v1.21.0
+    profiles: [observability]
+    command: ["run", "/etc/alloy/config.alloy"]
+    volumes:
+      - ./observability/config.alloy:/etc/alloy/config.alloy:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    depends_on: [loki]
+
+  grafana:
+    image: grafana/grafana:13.2.4
+    profiles: [observability]
+    ports: ["3000:3000"]
+    environment:
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Admin
+      GF_AUTH_DISABLE_LOGIN_FORM: "true"
+      GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH: /var/lib/grafana/dashboards/shopper.json
+    volumes:
+      - ./observability/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./observability/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    depends_on: [prometheus, loki]
