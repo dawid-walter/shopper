@@ -13,7 +13,7 @@ import com.shopper.aggregator.domain.ProductId;
 import com.shopper.aggregator.infrastructure.adapter.FastUpstreamFailure;
 import com.shopper.aggregator.infrastructure.adapter.UpstreamClient;
 
-public class PricingRestClient implements PricingPort {
+public class PricingAdapter implements PricingPort {
 
     private record PricingQuote(String currency, BigDecimal basePrice, BigDecimal discount, BigDecimal netPrice,
                                 BigDecimal vat, BigDecimal finalPrice) {
@@ -21,7 +21,7 @@ public class PricingRestClient implements PricingPort {
 
     private final UpstreamClient client;
 
-    public PricingRestClient(UpstreamClient client) {
+    public PricingAdapter(UpstreamClient client) {
         this.client = client;
     }
 

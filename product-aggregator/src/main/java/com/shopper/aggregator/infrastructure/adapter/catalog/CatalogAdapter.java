@@ -13,14 +13,14 @@ import com.shopper.aggregator.domain.ProductId;
 import com.shopper.aggregator.infrastructure.adapter.FastUpstreamFailure;
 import com.shopper.aggregator.infrastructure.adapter.UpstreamClient;
 
-public class CatalogRestClient implements CatalogPort {
+public class CatalogAdapter implements CatalogPort {
 
     private record CatalogProduct(String name, String description, Map<String, String> specs, List<String> images) {
     }
 
     private final UpstreamClient client;
 
-    public CatalogRestClient(UpstreamClient client) {
+    public CatalogAdapter(UpstreamClient client) {
         this.client = client;
     }
 

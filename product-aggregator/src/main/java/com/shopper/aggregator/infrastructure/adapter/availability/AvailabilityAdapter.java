@@ -11,14 +11,14 @@ import com.shopper.aggregator.domain.ProductId;
 import com.shopper.aggregator.infrastructure.adapter.FastUpstreamFailure;
 import com.shopper.aggregator.infrastructure.adapter.UpstreamClient;
 
-public class AvailabilityRestClient implements AvailabilityPort {
+public class AvailabilityAdapter implements AvailabilityPort {
 
     private record StockLevel(int quantity, String warehouse, int deliveryInDays) {
     }
 
     private final UpstreamClient client;
 
-    public AvailabilityRestClient(UpstreamClient client) {
+    public AvailabilityAdapter(UpstreamClient client) {
         this.client = client;
     }
 

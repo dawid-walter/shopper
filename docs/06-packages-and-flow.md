@@ -22,10 +22,10 @@ product-aggregator/src/main/java/com/shopper/aggregator/
 │   └── service/   ProductViewService     parallel calls, time budget, builds ProductView
 ├── infrastructure/
 │   ├── adapter/
-│   │   ├── catalog/      CatalogRestClient       (+ upstream DTO)
-│   │   ├── pricing/      PricingRestClient
-│   │   ├── availability/ AvailabilityRestClient
-│   │   └── customer/     CustomerRestClient
+│   │   ├── catalog/      CatalogAdapter          (+ upstream DTO)
+│   │   ├── pricing/      PricingAdapter
+│   │   ├── availability/ AvailabilityAdapter
+│   │   └── customer/     CustomerAdapter
 │   └── config/
 │       ├── UpstreamClientsConfig  base URLs and timeout per upstream
 │       └── ResilienceConfig       circuit breaker per upstream

@@ -11,14 +11,14 @@ import com.shopper.aggregator.domain.CustomerId;
 import com.shopper.aggregator.infrastructure.adapter.FastUpstreamFailure;
 import com.shopper.aggregator.infrastructure.adapter.UpstreamClient;
 
-public class CustomerRestClient implements CustomerPort {
+public class CustomerAdapter implements CustomerPort {
 
     private record Customer(String segment, List<String> preferences) {
     }
 
     private final UpstreamClient client;
 
-    public CustomerRestClient(UpstreamClient client) {
+    public CustomerAdapter(UpstreamClient client) {
         this.client = client;
     }
 

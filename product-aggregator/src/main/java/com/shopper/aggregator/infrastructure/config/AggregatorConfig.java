@@ -17,10 +17,10 @@ import com.shopper.aggregator.application.port.out.PricingPort;
 import com.shopper.aggregator.application.service.ProductViewService;
 import com.shopper.aggregator.infrastructure.adapter.UpstreamClient;
 import com.shopper.aggregator.infrastructure.adapter.UpstreamRejectedRequest;
-import com.shopper.aggregator.infrastructure.adapter.availability.AvailabilityRestClient;
-import com.shopper.aggregator.infrastructure.adapter.catalog.CatalogRestClient;
-import com.shopper.aggregator.infrastructure.adapter.customer.CustomerRestClient;
-import com.shopper.aggregator.infrastructure.adapter.pricing.PricingRestClient;
+import com.shopper.aggregator.infrastructure.adapter.availability.AvailabilityAdapter;
+import com.shopper.aggregator.infrastructure.adapter.catalog.CatalogAdapter;
+import com.shopper.aggregator.infrastructure.adapter.customer.CustomerAdapter;
+import com.shopper.aggregator.infrastructure.adapter.pricing.PricingAdapter;
 import com.shopper.aggregator.infrastructure.config.AggregatorProperties.Upstream;
 
 import io.github.resilience4j.circuitbreaker.CircuitBreakerConfig;
@@ -55,26 +55,26 @@ class AggregatorConfig {
     @Bean
     CatalogPort catalogPort(AggregatorProperties properties, CircuitBreakerRegistry breakers,
                             RestClient.Builder builder, MeterRegistry meters) {
-        return new CatalogRestClient(client("catalog", properties.upstreams().catalog(), breakers, builder, meters));
+        return new CatalogAdapter(client("catalog", properties.upstreams().catalog(), breakers, builder, meters));
     }
 
     @Bean
     PricingPort pricingPort(AggregatorProperties properties, CircuitBreakerRegistry breakers,
                             RestClient.Builder builder, MeterRegistry meters) {
-        return new PricingRestClient(client("pricing", properties.upstreams().pricing(), breakers, builder, meters));
+        return new PricingAdapter(client("pricing", properties.upstreams().pricing(), breakers, builder, meters));
     }
 
     @Bean
     AvailabilityPort availabilityPort(AggregatorProperties properties, CircuitBreakerRegistry breakers,
                                       RestClient.Builder builder, MeterRegistry meters) {
-        return new AvailabilityRestClient(
+        return new AvailabilityAdapter(
                 client("availability", properties.upstreams().availability(), breakers, builder, meters));
     }
 
     @Bean
     CustomerPort customerPort(AggregatorProperties properties, CircuitBreakerRegistry breakers,
                               RestClient.Builder builder, MeterRegistry meters) {
-        return new CustomerRestClient(client("customer", properties.upstreams().customer(), breakers, builder, meters));
+        return new CustomerAdapter(client("customer", properties.upstreams().customer(), breakers, builder, meters));
     }
 
     @Bean(destroyMethod = "shutdown")
