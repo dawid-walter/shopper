@@ -45,7 +45,7 @@ class AggregatorConfig {
                 .minimumNumberOfCalls(settings.window())
                 .failureRateThreshold(settings.failureRate())
                 .waitDurationInOpenState(settings.openFor())
-                .permittedNumberOfCallsInHalfOpenState(3)
+                .permittedNumberOfCallsInHalfOpenState(settings.halfOpenCalls())
                 .ignoreExceptions(UpstreamRejectedRequest.class)
                 .build());
         TaggedCircuitBreakerMetrics.ofCircuitBreakerRegistry(registry).bindTo(meters);

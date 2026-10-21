@@ -13,6 +13,7 @@ aggregator:
     window: 20
     failure-rate: 50
     open-for: 10s
+    half-open-calls: 3
   upstreams:
     catalog:
       url: http://localhost:8081

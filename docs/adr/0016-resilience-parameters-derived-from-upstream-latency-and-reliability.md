@@ -52,6 +52,11 @@ reliability counts fast errors; failures are independent between attempts.
 The values should be recomputed from measured p99.9 latency and error rates when the
 upstreams change or when metrics are available.
 
+The retry counts toward the circuit breaker's window: a request whose call is retried adds
+two calls to it. During an outage of fast errors the circuit therefore opens after about
+10 requests instead of 20; under normal load retries are rare and barely change the
+false-trip probability above.
+
 The retry does not check how much of the request budget is left. A retry that cannot
 finish in time is cut off by the budget like any other call, so it costs the upstream
 one wasted request but never delays the response. If that load matters, a retry
