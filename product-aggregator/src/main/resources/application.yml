@@ -3,3 +3,42 @@ server:
 spring:
   application:
     name: product-aggregator
+  threads:
+    virtual:
+      enabled: true
+
+aggregator:
+  budget: 500ms
+  circuit-breaker:
+    window: 20
+    failure-rate: 50
+    open-for: 10s
+  upstreams:
+    catalog:
+      url: http://localhost:8081
+      timeout: 235ms
+    pricing:
+      url: http://localhost:8082
+      timeout: 375ms
+    availability:
+      url: http://localhost:8083
+      timeout: 470ms
+    customer:
+      url: http://localhost:8084
+      timeout: 280ms
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, prometheus
+  endpoint:
+    health:
+      probes:
+        enabled: true
+  tracing:
+    sampling:
+      probability: 1.0
+  otlp:
+    metrics:
+      export:
+        enabled: false
