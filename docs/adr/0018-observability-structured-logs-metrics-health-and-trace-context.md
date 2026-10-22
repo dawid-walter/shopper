@@ -19,19 +19,22 @@ single request has to be followable across the aggregator and the upstreams.
 * Degradation must be visible to operators even though clients still get `200`.
 * One request must be traceable across services by one id, including calls made on
   the aggregator's virtual threads.
-* Logs, metrics and traces will be viewed in Grafana with Loki and Tempo.
+* Logs and metrics should be viewable in Grafana without making the default stack
+  heavier.
 
 ## Considered Options
 
-* Logs, metrics, health and trace context in every service now; the Grafana stack later
+* Logs, metrics, health and trace context in every service; Prometheus, Loki and
+  Grafana in an opt-in compose profile
 * Plain console logs only
-* The whole stack now: services plus Prometheus, Loki, Tempo and Grafana
+* The whole stack always on: services plus Prometheus, Loki, Tempo and Grafana
 
 ## Decision Outcome
 
-Chosen option: "Logs, metrics, health and trace context in every service now; the
-Grafana stack later", because it makes the services observable today and the Grafana
-stack only has to collect what they already emit.
+Chosen option: "Logs, metrics, health and trace context in every service; Prometheus,
+Loki and Grafana in an opt-in compose profile", because the services are observable on
+their own, and the collecting stack only gathers what they already emit and starts only
+when someone wants to look.
 
 | Concern | Decision |
 |---|---|
@@ -68,11 +71,11 @@ flowchart LR
 
 ## More Information
 
-The cold-start effect is addressed by warming the upstream calls up before the
-readiness probe reports ready.
+The cold-start effect is not handled in the services; the demo scripts send warm-up
+requests before running scenarios. Warming the upstream calls up before the readiness
+probe reports ready would remove it.
 
-The Grafana stack now runs from the same compose file under the `observability`
-profile: Prometheus scrapes every service every 5 s, Alloy ships the containers' logs to
+The collecting stack runs from the same compose file under the `observability` profile: Prometheus scrapes every service every 5 s, Alloy ships the containers' logs to
 Loki, and Grafana provisions both data sources and one dashboard (response time against
 the budget, statuses, upstream timings and failures, circuit breaker states, degraded
 sections, warnings). Tempo is not deployed; exporting spans to it needs only an OTLP
